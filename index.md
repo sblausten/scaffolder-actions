@@ -2466,72 +2466,248 @@ https://github.com/kirederik/backstage-k8s-scaffolder-actions/blob/main/src/acti
 ## Maven
 
 ### `maven`
-https://www.npmjs.com/package/@gcornacchia/backstage-plugin-scaffolder-maven-actions
+Runs Maven commands in a specified working directory with optional arguments.
 
+#### Inputs
+| **Key**                | **Description**                                            | **Type**        | **Example** |
+|------------------------|------------------------------------------------------------|-----------------|-------------|
+| `command`              | The Maven command to execute                                | `string`        |             |
+| `workingDirectory`      | Directory within the scaffolder workspace to run the command | `string`        |             |
+| `args`                 | Arguments to pass to the command                           | `string[]`      |             |
+
+#### Examples
+```yaml
+steps:
+  - id: maven
+    name: maven
+    action: maven
+    input:
+      command: ${{ parameters.command }} # ex: 'clean package' 
+      workingDirectory: ${{ parameters.workingDirectory }} # ex: './my-working-directory' - will execute the command in the specified directory relative to the scaffolder workspace
+      args: ${{ parameters.args }} # ex: ['-P', 'Profile'] - will add '-P Profile' to the arguments passed to the maven command
+```
+
+#### Outputs
+None
+
+#### Links
+https://www.npmjs.com/package/@gcornacchia/backstage-plugin-scaffolder-maven-actions
+https://github.com/gcornacchia/backstage-plugin-scaffolder-maven-actions/blob/develop/src/actions/maven.ts
 
 # 3rd Party Tools
 
 ## Ansible
 
 ### `ansible:jobTemplate:launch`
+Action for launching an Ansible job template and waiting for it to complete.
+
 #### Inputs
+
+| **Key**            | **Description**                          | **Type**            | **Example** |
+|--------------------|------------------------------------------|---------------------|-------------|
+| `ansibleConfig`     | Configuration for Ansible, including URL and token. | `object`            |             |
+| `jobTemplateId`     | The ID of the Ansible job template to be launched. | `number`            |             |
 
 #### Examples
 
 #### Outputs
+| **Key**  | **Description**                              | **Type**    |
+|----------|----------------------------------------------|-------------|
+| `job`    | Information for the Ansible job that was run. | `object`    |
 
 #### Links
 https://github.com/KiwiGDC/backstage-kawx/blob/main/plugins/scaffolder-backend-module-kawx/src/actions/run/run.ts
 
 ### `ansible-controller:job_template:launch`
-#### Inputs
+Triggers the launch of an Ansible job template via the Ansible controller API.
 
+#### Inputs
+| **Key**        | **Description**                              | **Type**      | **Example** |
+|----------------|----------------------------------------------|---------------|-------------|
+| `controller`   | Specifies the controller to be used          | `string`      |             |
+| `job_template` | Name of the job template to be executed      | `string`      |             |
+| `extra_vars`   | Additional variables passed to the job       | `object`      |             |
 #### Examples
+```yaml
+steps:
+  - id: call-ansible
+    name: Calling ansible to launch
+    action: ansible-controller:job_template:launch
+    input:
+      controller: my-controller
+      job_template: Demo Job Template
+      extra_vars:
+        execution_count: ${{ parameters.execution_count }}
+        fail_execution: ${{ parameters.fail_execution }}
+```
+Configure your template call to ansible.
 
 #### Outputs
+| **Key**  | **Description**               | **Type**     |
+|----------|-------------------------------|--------------|
+| `job`    | Status and details of the job  | `object`     |
 
 #### Links
 https://www.npmjs.com/package/@mycloudlab/scaffolder-backend-module-ansible-controller
+https://github.com/mycloudlab/scaffolder-backend-module-ansible-controller/blob/main/src/actions/ansible-controller/launch.ts
 
 ## ArgoCD
 
 ### `argocd:create-resources`
+Action for creating Argo CD resources using Backstage's scaffolding plugin.
+
 #### Inputs
+| Key              | Description                                                                                          | Type               | Example |
+|------------------|------------------------------------------------------------------------------------------------------|--------------------|---------|
+| `projectName`    | The name of the project as it will show up in Argo CD. By default, it uses the application name.    | `string`           |         |
+| `appName`        | The name of the app as it will show up in Argo CD.                                                  | `string`           |         |
+| `argoInstance`   | The name of the Argo CD Instance to deploy to.                                                     | `string`           |         |
+| `namespace`      | The namespace Argo CD will target for resource deployment.                                          | `string`           |         |
+| `repoUrl`        | The Repo URL that will be programmed into the Argo CD project and application.                     | `string`           |         |
+| `path`           | The path of the resources Argo CD will watch in the mentioned repository.                           | `string`           |         |
+| `labelValue`     | The label Backstage will use to find applications in Argo CD.                                       | `string`           |         |
 
 #### Examples
+```yaml
+steps:
+  - id: create-argocd-resources
+    name: Create ArgoCD Resources
+    action: argocd:create-resources
+    input:
+      appName: ${{ parameters.name }}-nonprod
+      argoInstance: ${{ parameters.argoinstance }}
+      namespace: ${{ parameters.namespace }}
+      repoUrl: ${{ steps.publish.output.remoteUrl }}
+      labelValue: ${{ parameters.name }}
+      path: "kubernetes/nonprod"
+```
+This creates Argo CD resources by invoking the `argocd:create-resources` action, using specified parameters for application name, Argo CD instance, namespace, repository URL, label value, and resource path.
 
 #### Outputs
 
+| Key        | Description                                      | Type         |
+|------------|--------------------------------------------------|--------------|
+| `argoInstance` | The Argo CD instance to which resources are deployed. | `string`     |
+| `appName`     | The name of the application in Argo CD.             | `string`     |
+| `projectName`  | The name of the project in Argo CD.                 | `string`     |
+| `namespace`    | The namespace where resources are deployed.         | `string`     |
+| `sourceRepo`   | The repository URL for the application resources.   | `string`     |
+| `sourcePath`   | The path within the repository where resources are located. | `string`  |
+| `labelValue`   | The label used to identify the application in Argo CD. | `string`  |
+
 #### Links
+https://github.com/RoadieHQ/roadie-backstage-plugins/tree/main/plugins/scaffolder-actions/scaffolder-backend-argocd
 
 ## AWS
 
 ### `roadiehq:aws:s3:cp`
+Action that uploads files from a local directory to an AWS S3 bucket using specified parameters.
+
 #### Inputs
+| Key                              | Description                                                              | Type           | Example |
+|----------------------------------|--------------------------------------------------------------------------|----------------|---------|
+| `bucket`                         | The bucket to copy the given path                                        | `string`       |         |
+| `region`                         | AWS region                                                              | `string`       |         |
+| `path`                           | A Glob pattern that lists the files to upload. Defaults to everything in the workspace | `string`       |         |
+| `prefix`                         | Prefix to use in the s3 key.                                           | `string`       |         |
+| `endpoint`                       | The fully qualified endpoint of the web service.                        | `string`       |         |
+| `s3ForcePathStyle`              | Whether to force path style URLs for S3 objects                          | `boolean`      |         |
 
 #### Examples
+```yaml
+steps:
+  - id: uploadToS3
+    name: Upload to S3
+    action: roadiehq:aws:s3:cp
+    input:
+      region: eu-west-1
+      bucket: ${{ parameters.bucket }}
+```
 
 #### Outputs
+| Key          | Description                             | Type    |
+|--------------|-----------------------------------------|---------|
+| `files`      | List of files that were successfully uploaded | `array`  | 
+| `error`      | Error message if the upload fails       | `string` | 
 
 #### Links
+https://github.com/RoadieHQ/roadie-backstage-plugins/tree/main/plugins/scaffolder-actions/scaffolder-backend-module-aws
 
 ### `roadiehq:aws:ecr:create`
+This TypeScript code defines a Backstage template action for creating an AWS Elastic Container Registry (ECR) repository.
+
 #### Inputs
 
-#### Examples
+| Key                | Description                                                                                       | Type   | Example |
+|--------------------|---------------------------------------------------------------------------------------------------|--------|---------|
+| `repoName`         | The name of the ECR repository.                                                                   | string |         |
+| `tags`             | List of tags.                                                                                     | array  |         |
+| `imageMutability`  | Set image mutability to true or false.                                                            | boolean|         |
+| `scanOnPush`       | The image scanning configuration for the repository. This determines whether images are scanned for known vulnerabilities after being pushed to the repository. | boolean|         |
+| `region`           | AWS region to create ECR on.                                                                      | string |         |
 
+
+#### Examples
+```yaml
+steps:
+    - id: create-ecr
+      name: Create ECR Rrepository
+      action: roadiehq:aws:ecr:create
+      input:
+        repoName: ${{ parameters.RepoName }}
+        tags: ${{parameters.Tags}}
+        imageMutability: ${{parameters.ImageMutability}}
+        scanOnPush: ${{parameters.ScanOnPush}}
+        region: ${{parameters.Region}}
+```
+This creates an AWS Elastic Container Registry (ECR) repository by utilizing the `roadiehq:aws:ecr:create` action and passing in parameters for the repository name, tags, image mutability, scan-on-push setting, and AWS region.
 #### Outputs
 
+| Key                    | Description                                                                                      | Type   |
+|------------------------|--------------------------------------------------------------------------------------------------|--------|
+| `repository.repositoryUri` | URI of the created ECR repository.                                                              | string |
+
 #### Links
+https://github.com/RoadieHQ/roadie-backstage-plugins/tree/main/plugins/scaffolder-actions/scaffolder-backend-module-aws
 
 ### `roadiehq:aws:secrets-manager:create`
+Action for creating a new secret in AWS Secrets Manager using the Backstage scaffolder plugin.
+
 #### Inputs
+| Key                | Description                                          | Type      | Example |
+|--------------------|------------------------------------------------------|-----------|---------|
+| `name`             | The name of the secret to be created                | `string`  |         |
+| `description`      | The description of the secret to be created         | `string`  |         |
+| `value`            | The string value to be encrypted in the new secret   | `string`  |         |
+| `tags`             | AWS tags to be added to the secret                  | `array`   |         |
+| `profile`          | AWS profile to use                                   | `string`  |         |
+| `region`           | AWS region to create the secret on                  | `string`  |         |
 
 #### Examples
-
+```yaml
+steps:
+    - id: createSecret
+      name: create secret - prod
+      action: roadiehq:aws:secrets-manager:create
+      input:
+        name: ${{ parameters.Name }}
+        description: ${{ parameters.Description }}
+        value: ${{ parameters.Value }}
+        tags: ${{parameters.Tags}}
+        profile: ${{parameters.Profile}}
+        region: ${{parameters.Region}}
+```
 #### Outputs
 
+| Key                | Description                                          | Type      |
+|--------------------|------------------------------------------------------|-----------|
+| `secretArn`        | The ARN of the created secret                        | `string`  |
+| `name`             | The name of the created secret                       | `string`  |
+| `description`      | The description of the created secret                | `string`  |
+| `tags`             | The tags associated with the created secret          | `array`   | 
+
 #### Links
+https://github.com/RoadieHQ/roadie-backstage-plugins/tree/main/plugins/scaffolder-actions/scaffolder-backend-module-aws
 
 ### `opa:get-env-providers`
 #### Inputs
@@ -2541,7 +2717,6 @@ https://www.npmjs.com/package/@mycloudlab/scaffolder-backend-module-ansible-cont
 #### Outputs
 
 #### Links
-https://www.npmjs.com/package/@aws/plugin-scaffolder-backend-aws-apps-for-backstage
 
 ### `opa:create-secret`
 #### Inputs
@@ -2587,6 +2762,17 @@ https://www.npmjs.com/package/@aws/plugin-scaffolder-backend-aws-apps-for-backst
 #### Inputs
 
 #### Examples
+```yaml
+steps:
+  - id: create-ecr-repository
+    name: Create ECR Repository
+    action: aws:cloudcontrol:create
+    input:
+      typeName: 'AWS::ECR::Repository'
+      desiredState: '{"RepositoryName": "${{ parameters.name }}-ecr-repository"}'
+      wait: true
+      maxWaitTime: 20
+```
 
 #### Outputs
 
@@ -2596,27 +2782,60 @@ https://www.npmjs.com/package/@alithya-oss/plugin-scaffolder-backend-module-aws-
 ## Azure
 
 ### `publish:azure`
+Action to initialize a Git repository and publish it to Azure DevOps, along with its input and output schemas.
+
+
 #### Inputs
 
+| Key                  | Description                                                                                                                    | Type                | Example |
+|----------------------|-------------------------------------------------------------------------------------------------------------------------------|---------------------|---------|
+| `repoUrl`            | Repository Location                                                                                                          | `string`            |         |
+| `description`        | Repository Description                                                                                                       | `string`            |         |
+| `defaultBranch`      | Sets the default branch on the repository. The default value is 'master'.                                                  | `string`            |         |
+| `gitCommitMessage`   | Sets the commit message on the repository. The default value is 'initial commit'.                                           | `string`            |         |
+| `gitAuthorName`      | Sets the default author name for the commit. The default value is 'Scaffolder'.                                             | `string`            |         |
+| `gitAuthorEmail`     | Sets the default author email for the commit.                                                                                | `string`            |         |
+| `sourcePath`         | Path within the workspace that will be used as the repository root. If omitted, the entire workspace will be published.     | `string`            |         |
+| `token`              | The token to use for authorization to Azure.                                                                                 | `string`            |         |
+
 #### Examples
+```yaml
+steps:
+  - id: publish
+    action: publish:azure
+    name: Publish to Azure
+    input:
+      repoUrl: 'dev.azure.com?organization=organization&project=project&repo=repo'
+      description: 'Initialize a git repository'
+```
+
+This performs an action to publish content to Azure DevOps by initializing a Git repository with a specified URL and description.
 
 #### Outputs
-
+| Key                  | Description                                                                           | Type                |
+|----------------------|--------------------------------------------------------------------------------------|---------------------|
+| `remoteUrl`          | A URL to the repository with the provider                                            | `string`            |
+| `repoContentsUrl`    | A URL to the root of the repository                                                  | `string`            |
+| `repositoryId`       | The Id of the created repository                                                      | `string`            |
+| `commitHash`         | The git commit hash of the initial commit                                             | `string`            |
 #### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-azure/src/actions/azure.ts
 
 ### `azure:repo:clone`
+Action for cloning an Azure DevOps repository into a specified workspace directory, handling authentication via personal access tokens or bearer tokens.
 
 #### Inputs
 
+| **Key**            | **Description**                                      | **Type**     | **Example** |
+|--------------------|------------------------------------------------------|--------------|-------------|
+| `remoteUrl`        | The Git URL to the repository.                       | `string`     |             |
+| `branch`           | The branch to checkout to.                           | `string`     |             |
+| `targetPath`       | The subdirectory of the working directory to clone the repository into. | `string` |             |
+| `server`           | The hostname of the Azure DevOps service. Defaults to `dev.azure.com`. | `string` |             |
+| `token`            | The token to use for authorization.                  | `string`     |             |
+
+
 #### Examples
-
-#### Outputs
-
-#### Links
-
-Clone a repo from Azure DevOps into the workspace. See input options [in the application](/docs/scaffolder/writing-templates/#actions)
-
 ```yaml
     - id: cloneAzureRepo
       name: Clone Azure Repo
@@ -2627,27 +2846,66 @@ Clone a repo from Azure DevOps into the workspace. See input options [in the app
         targetPath: ./sub-directory
 ```
 
+#### Outputs
+| **Key**          | **Description**                    | **Type**    |
+|------------------|------------------------------------|-------------|
+| `repositoryId`   | The ID of the cloned repository.    | `string`    |
+
+#### Links
+https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-repositories/blob/main/src/actions/run/cloneAzureRepo.ts
+
+
 ### `git:clone:azure`
+This code defines a Backstage Scaffolder action for cloning repositories from Azure DevOps Git and another for launching job templates in an Ansible controller.
+
 #### Inputs
+| **Key**        | **Description**                                                | **Type**        | **Example** |
+|----------------|----------------------------------------------------------------|-----------------|-------------|
+| `repoUrl`      | Repo URL to be parsed with `parseRepoUrl`                      | `string`        |             |
+| `fromRef`      | Git references (branch, tag, or commit ID) to checkout; default is `'master'` | `string`        |             |
+| `targetPath`   | Relative path on the workspace to store repository contents; default is `'./'` | `string`        |             |
 
 #### Examples
 
+```yaml
+steps:
+  - action: GIT_CLONE_AZURE
+    id: git-azure-clone
+    name: Clone from azure repo same ref
+    input:
+      commonParams:
+        fromRef: ref/heads/main
+      params:
+        - repoUrl: dev.azure.com?owner=backstage-demo&organization=k3tech&repo=my-repo-1
+          targetPath: ./repo-1
+        - repoUrl: dev.azure.com?owner=backstage-demo&organization=k3tech&repo=my-repo-2
+          targetPath: ./repo-2
+```
+
+### Description
+This clones two Azure DevOps repositories using the same Git reference (`main`).
+
 #### Outputs
+| **Key**  | **Description**                                  | **Type**  |
+|----------|--------------------------------------------------|-----------|
+| `results` | Array of results containing repository clone details | `array<object>` |
 
 #### Links
-clone multiple repos
 https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-azure-devops/blob/main/src/actions/repos/git-clone-azure.ts
 
 ### `azure:repo:push`
+The provided TypeScript code defines a function `pushAzureRepoAction` that creates a template action for pushing content from a local workspace to a remote Azure repository using Backstage's scaffolding plugin.
+
 #### Inputs
+| **Key**             | **Description**                                                          | **Type**     | **Example** |
+|---------------------|--------------------------------------------------------------------------|--------------|-------------|
+| `branch`            | The branch to checkout to.                                                | `string`     |             |
+| `sourcePath`        | The subdirectory of the working directory containing the repository.       | `string`     |             |
+| `gitCommitMessage`   | The commit message for the repository. Default is "Initial commit".       | `string`     |             |
+| `gitAuthorName`      | The default author name for the commit. Default is "Scaffolder".          | `string`     |             |
+| `gitAuthorEmail`     | The default author email for the commit.                                 | `string`     |             |
 
 #### Examples
-
-#### Outputs
-
-#### Links
-Push changes to an Azure repository. See input options [in the application](/docs/scaffolder/writing-templates/#actions)
-
 ```yaml    
     - id: pushAzureRepo
       name: Push to Remote Azure Repo
@@ -2658,16 +2916,328 @@ Push changes to an Azure repository. See input options [in the application](/doc
         gitCommitMessage: Add ${{ parameters.name }} project files
 ```
 
+#### Outputs
+
+| **Key**        | **Description**                                       | **Type**     |
+|----------------|-------------------------------------------------------|--------------|
+| `commitMessage`| The commit message used for the commit.                | `string`     |
+| `gitAuthorInfo`| Information about the Git author (name and email).     | `object`     |
+| `branch`       | The branch where changes were pushed.                  | `string`     |
+
+#### Links
+https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-repositories/blob/main/src/actions/run/pushAzureRepo.ts
+
+
 ### `azure:repo:pr`
+Action that creates a pull request (PR) in an Azure DevOps repository using customizable inputs.
+
 #### Inputs
+| **Key**                | **Description**                                                               | **Type**    | **Example** |
+|------------------------|-------------------------------------------------------------------------------|-------------|-------------|
+| `organization`          | The name of the organization in Azure DevOps.                                 | `string`    |             |
+| `sourceBranch`          | The branch to merge into the source.                                          | `string`    |             |
+| `targetBranch`          | The branch to merge into (default: main).                                     | `string`    |             |
+| `title`                 | The title of the pull request.                                                | `string`    |             |
+| `description`           | The description of the pull request.                                          | `string`    |             |
+| `repoId`                | Repo ID of the pull request.                                                  | `string`    |             |
+| `project`               | The Project in Azure DevOps.                                                  | `string`    |             |
+| `supportsIterations`     | Whether or not the PR supports iterations.                                    | `boolean`   |             |
+| `server`                | The hostname of the Azure DevOps service (defaults to `dev.azure.com`).       | `string`    |             |
+| `token`                 | The token to use for authorization.                                           | `string`    |             |
+| `autoComplete`          | Enable auto-completion of the pull request once policies are met.             | `boolean`   |             |
 
 #### Examples
+```yaml
+    - id: pushAzureRepo
+      name: Push to Remote Azure Repo
+      action: azure:repo:push
+      input:
+        branch: <MY_AZURE_REPOSITORY_BRANCH>
+        sourcePath: ./sub-directory
+        gitCommitMessage: Add ${{ parameters.name }} project files
+```
 
 #### Outputs
+| **Key**           | **Description**                            | **Type**   |
+|-------------------|--------------------------------------------|------------|
+| `pullRequestId`    | The ID of the created pull request.        | `number`   |
 
 #### Links
 Create a PR in Azure. See input options [in the application](/docs/scaffolder/writing-templates/#actions)
+https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-repositories/blob/main/src/actions/run/pullRequestAzureRepo.ts
 
+### `git:commit:azure`
+Action for committing and pushing changes to an Azure DevOps Git repository. It sets up the input schema, processes parameters, handles Git operations, and pushes changes to the repository.
+
+#### Inputs
+
+| **Key**            | **Description**                                                                                          | **Type**      | **Example** |
+|--------------------|----------------------------------------------------------------------------------------------------------|---------------|-------------|
+| `toBranch`         | New branch to commit and push.                                                                            | `string`      |             |
+| `commitMessage`    | Commit message string.                                                                                    | `string`      |             |
+| `targetPath`       | Relative path on workspace where repository contents are stored, default is `'./'`.                       | `string`      |             |
+
+#### Examples
+
+```yaml
+steps:
+  - action: GIT_COMMIT_AZURE
+    id: git-azure-commit
+    name: Commit to azure repo same ref
+    input:
+      commonParams:
+        toBranch: ref/heads/main
+        commitMessage: chore: backstage git:commit:azure
+      params:
+        - targetPath: ./repo-1
+        - targetPath: ./repo-2
+```
+Step to commit and push changes to an Azure DevOps Git repository on the `main` branch for two different repositories (`./repo-1` and `./repo-2`) using the specified commit message.
+
+#### Outputs
+
+| **Key**     | **Description**                                                 | **Type**    |
+|-------------|-----------------------------------------------------------------|-------------|
+| `results`   | Array of objects containing the results of the commit operation. | `array`     |
+#### Links
+https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-azure-devops/blob/main/src/actions/repos/git-commit-azure.ts
+
+### `azure:pipeline:create`
+This creates an Azure Pipeline through the Azure DevOps REST API using Backstage's scaffolding plugin.
+
+#### Inputs
+| **Key**              | **Description**                                                                     | **Type**     | **Example** |
+|----------------------|-------------------------------------------------------------------------------------|--------------|-------------|
+| `createApiVersion`    | The Azure Create Pipeline API version to use. Defaults to 6.1-preview.1.            | `string`     |             |
+| `server`             | The host of Azure DevOps. Defaults to dev.azure.com.                                 | `string`     |             |
+| `organization`        | The name of the Azure DevOps organization.                                          | `string`     |             |
+| `project`            | The name of the Azure project.                                                      | `string`     |             |
+| `folder`             | The name of the folder of the pipeline.                                              | `string`     |             |
+| `name`               | The name of the pipeline.                                                           | `string`     |             |
+| `repositoryId`       | The ID of the repository.                                                           | `string`     |             |
+| `repositoryName`     | The name of the repository.                                                         | `string`     |             |
+| `yamlPath`           | The location of the Azure DevOps Pipeline definition file. Defaults to /azure-pipelines.yaml. | `string`     |             |
+| `token`              | Optional. Token for Azure API authentication. If not provided, uses credentials from integration. | `string`     |             |
+
+
+#### Examples
+```yaml
+ - id: createAzurePipeline
+      name: Create Azure Pipeline
+      action: azure:pipeline:create
+      input:
+        organization: ${{ (parameters.repoUrl | parseRepoUrl)['organization'] }}
+        project: ${{ (parameters.repoUrl | parseRepoUrl)['owner'] }}
+        folder: "my-azure-pipelines-folder"
+        name: ${{ parameters.name }}
+        repositoryId: ${{ steps.publish.output.repositoryId }}
+        repositoryName: ${{ (parameters.repoUrl | parseRepoUrl)['repo'] }}
+        yamlPath: <optional value to your azure pipelines yaml file, defaults to ./azure-pipelines.yaml>
+```
+
+#### Outputs
+| **Key**       | **Description**                                      | **Type**  |
+|---------------|------------------------------------------------------|-----------|
+| `pipelineId`  | The ID of the created Azure pipeline.                | `string`  |
+| `pipelineUrl` | The URL to the created Azure pipeline in Azure DevOps. | `string`  |
+
+#### Links
+https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-pipelines/tree/main
+https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-pipelines/blob/main/src/actions/run/createAzurePipeline.ts
+
+### `pipeline:create:azure`
+Automates the creation of Azure DevOps pipelines from Git repositories.
+
+#### Inputs
+| **Key**          | **Description**                                                         | **Type**     | **Example** |
+|------------------|-------------------------------------------------------------------------|--------------|-------------|
+| `pipelinePath`    | Path to the pipeline in the repository                                 | `string`     |             |
+| `yamlFilename`    | Path to pipeline YAML file (default: `.azuredevops/azure-pipelines.yaml`) | `string`     |             |
+| `pipelineName`    | Name of the pipeline                                                   | `string`     |             |
+| `defaultBranch`   | Default branch reference (default: `refs/heads/main`)                  | `string`     |             |
+| `repoUrl`         | Repository URL to be parsed with `parseRepoUrl`                        | `string`     |             |
+
+#### Examples
+
+```yaml
+steps:
+  - action: PIPELINE_CREATE_AZURE
+    id: pipeline-create-azure
+    name: Create pipelines
+    input:
+      commonParams:
+        defaultBranch: 'ref/heads/main'
+        pipelinePath: 'my-microsservices'
+        yamlFilename: '.azure-pipeline.yaml'
+      params:
+        - repoUrl: './repo-1'
+          pipelineName: 'repo-1'
+        - repoUrl: './repo-2'
+          pipelineName: 'repo-2'
+```
+
+This creates Azure pipelines for two repositories (`repo-1` and `repo-2`), using common parameters such as the default branch, pipeline path, and YAML filename.
+
+
+#### Outputs
+| **Key**  | **Description**                            | **Type**   |
+|----------|--------------------------------------------|------------|
+| `results`| The result array with pipeline creation responses | `array<object>` |
+
+#### Links
+https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-azure-devops/blob/main/src/actions/piepline/pipeline-create-azure.ts
+
+### `azure:pipeline:run`
+### Code Description:
+Defines an Azure DevOps pipeline runner action using Backstage's scaffolder plugin.
+
+#### Inputs
+| **Key**               | **Description**                                                | **Type**   | **Example** |
+|-----------------------|----------------------------------------------------------------|------------|-------------|
+| `runApiVersion`        | The Azure Run Pipeline API version to use. Defaults to 7.0     | `string`   |             |
+| `buildApiVersion`      | The Builds API version to use. Defaults to 6.1-preview.6       | `string`   |             |
+| `server`               | The host of Azure DevOps. Defaults to dev.azure.com            | `string`   |             |
+| `organization`         | The name of the Azure DevOps organization                      | `string`   |             |
+| `pipelineId`           | The pipeline ID                                                | `string`   |             |
+| `project`              | The name of the Azure project                                  | `string`   |             |
+| `branch`               | The branch of the pipeline's repository                        | `string`   |             |
+| `pipelineParameters`   | The values needed as parameters to start a build               | `object`   |             |
+#### Examples
+```yaml
+    - id: runAzurePipeline
+      name: Run Azure Pipeline
+      action: azure:pipeline:run
+      input:
+        organization: ${{ (parameters.repoUrl | parseRepoUrl)['organization'] }}
+        pipelineId: ${{ steps.createAzurePipeline.output.pipelineId }}
+        project: ${{ (parameters.repoUrl | parseRepoUrl)['owner'] }}
+```
+
+#### Outputs
+| **Key**         | **Description**                                        | **Type**   |
+|-----------------|--------------------------------------------------------|------------|
+| `pipelineRunId` | ID of the initiated Azure pipeline run                  | `number`   |
+| `pipelineUrl`   | URL to the Azure pipeline run                          | `string`   |
+| `status`        | Status of the pipeline run (e.g., inProgress, completed)| `string`   |
+
+#### Links
+https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-pipelines/tree/main
+https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-pipelines/blob/main/src/actions/run/runAzurePipeline.ts
+
+### `azure:pipeline:permit`
+Defines an Azure DevOps pipeline permission management action for Backstage scaffolding.
+
+#### Inputs
+| **Key**              | **Description**                                           | **Type**    | **Example** |
+|----------------------|-----------------------------------------------------------|-------------|-------------|
+| `permitsApiVersion`   | The Azure Permits Pipeline API version to use. Defaults to `7.1-preview.1`. | `string`    |             |
+| `server`             | The host of Azure DevOps. Defaults to `dev.azure.com`.     | `string`    |             |
+| `organization`       | The name of the Azure DevOps organization.                | `string`    |             |
+| `project`            | The name of the Azure DevOps project.                     | `string`    |             |
+| `resourceId`         | The resource ID for which permissions are being changed.  | `string`    |             |
+| `resourceType`       | The type of the resource (e.g., `endpoint`).              | `string`    |             |
+| `authorized`         | A boolean indicating whether to authorize (`true`) or unauthorize (`false`) the pipeline. | `boolean`   |             |
+| `pipelineId`         | The ID of the Azure pipeline to be authorized/unauthorized. | `string`    |             |
+| `token`              | An optional token for Azure DevOps API authentication. If not provided, it uses the credentials from the integration. | `string`    |             |
+#### Examples
+```yaml
+    - id: permitAzurePipeline
+      name: Change Azure Pipeline Permissions
+      action: azure:pipeline:permit
+      input:
+        organization: ${{ (parameters.repoUrl | parseRepoUrl)['organization'] }}
+        project: ${{ (parameters.repoUrl | parseRepoUrl)['owner'] }}
+        resourceId: <serviceEndpointId>
+        resourceType: endpoint
+        authorized: true
+        pipelineId: ${{ steps.createAzurePipeline.output.pipelineId }}
+```
+#### Outputs
+| **Key**              | **Description**                                           | **Type**    |
+|----------------------|-----------------------------------------------------------|-------------|
+| `response.ok`        | A boolean indicating if the pipeline permissions were successfully changed. | `boolean`   |
+| `response.status`    | The HTTP status code of the pipeline permissions change request. | `number`    |
+
+#### Links
+https://www.npmjs.com/package/@parfuemerie-douglas/scaffolder-backend-module-azure-pipelines
+https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-pipelines/tree/main
+https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-pipelines/blob/main/src/actions/run/permitAzurePipeline.ts
+
+### `azure:repo:clone`
+Action for cloning an Azure repository into a specified workspace directory using Backstage's scaffolding plugin.
+
+#### Inputs
+| Key         | Description                                                      | Type    | Example |
+|-------------|------------------------------------------------------------------|---------|---------|
+| `remoteUrl` | The Git URL to the repository.                                   | `string`|         |
+| `branch`    | The branch to checkout to.                                       | `string`|         |
+| `targetPath`| The subdirectory of the working directory to clone the repository into. | `string`|         |
+| `server`    | The hostname of the Azure DevOps service. Defaults to `dev.azure.com`. | `string`|         |
+| `token`     | The token to use for authorization.                              | `string`|         |
+
+#### Examples
+```yaml
+steps:
+  - id: cloneAzureRepo
+    name: Clone Azure Repo
+    action: azure:repo:clone
+    input:
+      remoteUrl: "https://<MY_AZURE_ORGANIZATION>@dev.azure.com/<MY_AZURE_ORGANIZATION>/<MY_AZURE_PROJECT>/_git/<MY_AZURE_REPOSITORY>"
+      branch: "main"
+      targetPath: ./sub-directory
+```
+
+#### Outputs
+None
+
+#### Links
+https://www.npmjs.com/package/@parfuemerie-douglas/scaffolder-backend-module-azure-repositories
+https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-repositories/blob/main/src/actions/run/cloneAzureRepo.ts
+
+### `azure:repo:push`
+Action that pushes content from a local workspace to a remote Azure repository.
+
+#### Inputs
+| Key                 | Description                                                                                   | Type     | Example |
+|---------------------|-----------------------------------------------------------------------------------------------|----------|---------|
+| `branch`            | The branch to checkout to.                                                                    | `string` |         |
+| `sourcePath`        | The subdirectory of the working directory containing the repository.                         | `string` |         |
+| `gitCommitMessage`  | Sets the commit message on the repository. The default value is 'Initial commit'.            | `string` |         |
+| `gitAuthorName`     | Sets the default author name for the commit. The default value is 'Scaffolder'.             | `string` |         |
+| `gitAuthorEmail`    | Sets the default author email for the commit.                                               | `string` |         |
+
+#### Examples
+```yaml
+    - id: pushAzureRepo
+      name: Push to Remote Azure Repo
+      action: azure:repo:push
+      input:
+        branch: <MY_AZURE_REPOSITORY_BRANCH>
+        sourcePath: ./sub-directory
+        gitCommitMessage: Add ${{ parameters.name }} project files
+```
+
+#### Outputs
+
+None
+
+#### Links
+https://www.npmjs.com/package/@parfuemerie-douglas/scaffolder-backend-module-azure-repositories
+https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-repositories/blob/main/src/actions/run/pushAzureRepo.ts
+
+### `azure:repo:pr`
+Action that pushes content from a local workspace to a remote Azure repository.
+
+#### Inputs
+| Key                 | Description                                                                                   | Type     | Example |
+|---------------------|-----------------------------------------------------------------------------------------------|----------|---------|
+| `branch`            | The branch to checkout to.                                                                    | `string` |         |
+| `sourcePath`        | The subdirectory of the working directory containing the repository.                         | `string` |         |
+| `gitCommitMessage`  | Sets the commit message on the repository. The default value is 'Initial commit'.            | `string` |         |
+| `gitAuthorName`     | Sets the default author name for the commit. The default value is 'Scaffolder'.             | `string` |         |
+| `gitAuthorEmail`    | Sets the default author email for the commit.                                               | `string` |         |
+
+#### Examples
 ```yaml
     - id: pullRequestAzureRepo
       name: Create a Pull Request to Azure Repo
@@ -2678,92 +3248,12 @@ Create a PR in Azure. See input options [in the application](/docs/scaffolder/wr
         repoId: <MY_AZURE_REPOSITORY>
         title: ${{ parameters.name }}
         project: <MY_AZURE_PROJECT>
+        organization: <MY_AZURE_ORGANIZATION>
         supportsIterations: false
 ```
 
-### `git:commit:azure`
-#### Inputs
-
-#### Examples
-
 #### Outputs
-
-#### Links
-commit and push to branch
-https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-azure-devops/blob/main/src/actions/repos/git-commit-azure.ts
-
-### `azure:pipeline:create`
-#### Inputs
-
-#### Examples
-
-#### Outputs
-
-#### Links
-https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-pipelines/tree/main
-https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-pipelines/blob/main/src/actions/run/createAzurePipeline.ts
-
-### `pipeline:create:azure`
-#### Inputs
-
-#### Examples
-
-#### Outputs
-
-#### Links
-https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-azure-devops/blob/main/src/actions/piepline/pipeline-create-azure.ts
-
-### `azure:pipeline:run`
-#### Inputs
-
-#### Examples
-
-#### Outputs
-
-#### Links
-https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-pipelines/tree/main
-https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-pipelines/blob/main/src/actions/run/runAzurePipeline.ts
-
-### `azure:pipeline:permit`
-#### Inputs
-
-#### Examples
-
-#### Outputs
-
-#### Links
-https://www.npmjs.com/package/@parfuemerie-douglas/scaffolder-backend-module-azure-pipelines
-https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-pipelines/tree/main
-https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-pipelines/blob/main/src/actions/run/permitAzurePipeline.ts
-
-### `azure:repo:clone`
-#### Inputs
-
-#### Examples
-
-#### Outputs
-
-#### Links
-https://www.npmjs.com/package/@parfuemerie-douglas/scaffolder-backend-module-azure-repositories
-https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-repositories/blob/main/src/actions/run/cloneAzureRepo.ts
-
-### `azure:repo:push`
-#### Inputs
-
-#### Examples
-
-#### Outputs
-
-#### Links
-https://www.npmjs.com/package/@parfuemerie-douglas/scaffolder-backend-module-azure-repositories
-https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-repositories/blob/main/src/actions/run/pushAzureRepo.ts
-
-### `azure:repo:pr`
-#### Inputs
-
-#### Examples
-
-#### Outputs
+None
 
 #### Links
 https://www.npmjs.com/package/@parfuemerie-douglas/scaffolder-backend-module-azure-repositories
