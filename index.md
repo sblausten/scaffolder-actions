@@ -368,33 +368,95 @@ https://github.com/backstage/backstage/tree/master/plugins/scaffolder-backend-mo
 Downloads a single file and templates variables into file. Then places the result in the workspace, or optionally in a subdirectory specified by the 'targetPath' input option.
 
 #### Inputs
-| Field                | Type      | Required | Description                                                               |
-|----------------------|-----------|----------|---------------------------------------------------------------------------|
-| `url`                | `string`  | Yes      | Relative path or absolute URL pointing to the single file to fetch        |
-| `targetPath`         | `string`  | Yes      | Target path within the working directory to download the file as          |
-| `values`             | `object`  | No       | Values to pass on to the templating engine                                |
-| `cookiecutterCompat` | `boolean` | No       | Enable features for compatibility with fetch:cookiecutter templates       |
-| `replace`            | `boolean` | No       | Replace the file in targetPath instead of skipping existing ones          |
-| `token`              | `string`  | No       | Optional token to use for authentication when reading resources           |
+
+| **Key**              | **Description**                                                                                            | **Type**    | **Example** |
+|----------------------|------------------------------------------------------------------------------------------------------------|-------------|-------------|
+| `url`                | Relative path or absolute URL pointing to the single file to fetch.                                         | `string`    |             |
+| `targetPath`         | Target path within the working directory to download the file as.                                           | `string`    |             |
+| `values`             | Values to pass on to the templating engine.                                                                 | `object`    |             |
+| `cookiecutterCompat` | Enable features to maximize compatibility with templates built for fetch:cookiecutter.                      | `boolean`   |             |
+| `replace`            | If set, replaces the file in targetPath instead of overwriting the existing one.                            | `boolean`   |             |
+| `trimBlocks`         | Controls trimming of block white spaces in templates, if applicable.                                        | `boolean`   |             |
+| `lstripBlocks`       | Controls stripping of left-hand whitespace before block-level structures.                                   | `boolean`   |             |
+| `token`              | An optional token to use for authentication when reading the resources.                                     | `string`    |             |
 
 #### Examples
+```yaml
+steps:
+  - action: fetch:template:file
+    id: fetch-template-file
+    name: Fetch template file
+    input:
+      url: './skeleton.txt'
+      targetPath: './target/skeleton.txt'
+      values:
+        name: 'test-project'
+        count: 1234
+        itemList: ['first', 'second', 'third']
 
+```
+This example fetches a single template from a relative path and substitutes the values name, count, and itemList into the file during the templating process. This allows for dynamic content creation based on the input values.
 #### Outputs
+`None`
 
 #### Links
 
-https://github.com/backstage/backstage/tree/master/plugins/scaffolder-backend-module-rails
+[code](https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend/src/scaffolder/actions/builtin/fetch/templateFile.ts)
 
 ### `fetch:rails`
+Downloads a Rails template from a given URL, applies templating using Rails, and optionally runs it inside a Docker container.
 
 #### Inputs
 
+| **Key**                     | **Description**                                                              | **Type**               | **Example** |
+|-----------------------------|------------------------------------------------------------------------------|------------------------|-------------|
+| `url`                       | Relative path or absolute URL pointing to the directory tree to fetch         | `string`               |             |
+| `targetPath`                | Target path within the working directory to download the contents to          | `string`               |             |
+| `values`                    | Values to pass on to Rails for templating                                     | `object`               |             |
+| `values.railsArguments`      | Arguments to pass to the `rails new` command                                 | `object`               |             |
+| `values.railsArguments.minimal` | Preconfigure a minimal Rails app                                           | `boolean`              |             |
+| `values.railsArguments.skipBundle` | Don't run `bundle install`                                             | `boolean`              |             |
+| `values.railsArguments.skipWebpackInstall` | Don't run Webpack install                                      | `boolean`              |             |
+| `values.railsArguments.skipTest`  | Skip test files                                                          | `boolean`              |             |
+| `values.railsArguments.skipActionCable` | Skip Action Cable files                                            | `boolean`              |             |
+| `values.railsArguments.skipActionMailer` | Skip Action Mailer files                                          | `boolean`              |             |
+| `values.railsArguments.skipActionMailbox` | Skip Action Mailbox gem                                          | `boolean`              |             |
+| `values.railsArguments.skipActiveStorage` | Skip Active Storage files                                        | `boolean`              |             |
+| `values.railsArguments.skipActionText` | Skip Action Text gem                                               | `boolean`              |             |
+| `values.railsArguments.skipActiveRecord` | Skip Active Record files                                          | `boolean`              |             |
+| `values.railsArguments.force` | Overwrite files that already exist                                          | `boolean`              |             |
+| `values.railsArguments.api`   | Preconfigure smaller stack for API-only apps                                 | `boolean`              |             |
+| `values.railsArguments.template` | Path to an application template (filesystem path or URL)                 | `string`               |             |
+| `values.railsArguments.webpacker` | Preconfigure Webpack with a specific framework (e.g. react, vue, etc.)   | `string (enum)`        |             |
+| `values.railsArguments.database` | Preconfigure for selected database (e.g. mysql, postgresql, etc.)         | `string (enum)`        |             |
+| `values.railsArguments.railsVersion` | Set up the app with a Gemfile pointing to a specific Rails version    | `string (enum)`        |             |
+| `imageName`                  | Specify a Docker image to run `rails new`. Used when a local Rails is not found | `string`               |             |
+
+
 #### Examples
+```yaml
+steps:
+  - id: fetch-base
+    name: Fetch Base
+    action: fetch:rails
+    input:
+      url: ./template
+      values:
+        name: ${{ parameters.name }}
+        owner: ${{ parameters.owner }}
+        system: ${{ parameters.system }}
+        railsArguments: ${{ parameters.railsArguments }}
+```
+This step fetches the specified Rails template and configures it with the provided values and Rails arguments, enabling customization based on user input during scaffolding.
 
 #### Outputs
+| **Key**           | **Description**                                         | **Type**   |
+|-------------------|---------------------------------------------------------|------------|
+| `targetPath`      | Path where the template will be downloaded and processed | `string`   |
+| `outputPath`      | The result directory where the generated files are copied | `string`   |
 
 #### Links
-https://github.com/backstage/backstage/tree/master/plugins/scaffolder-backend-module-rails
+[code](https://github.com/backstage/backstage/tree/master/plugins/scaffolder-backend-module-rails)
 
 ## HTTP Requests
 
@@ -496,6 +558,7 @@ steps:
 ---
 
 #### Links
+[code](https://github.com/RoadieHQ/roadie-backstage-plugins/tree/main/plugins/scaffolder-actions/scaffolder-backend-module-http-request)
 
 
 ## Debugging
@@ -538,13 +601,24 @@ Waits for a certain period of time.
 
 None
 
---- 
 
 ### `debug:fs:read:plus`
 
 #### Inputs
 
 #### Examples
+```yaml
+steps:
+  - action: debug:fs:read:plus
+    id: debug-fs-read
+    name: Read files
+    input:
+      files:
+        - ./catalog-info.yaml
+        - some-file.txt
+      useMainLogger: true
+
+```
 
 #### Outputs
 
@@ -601,18 +675,41 @@ Either `catalogInfoUrl` must be specified or `repoContentsUrl` must be specified
 None
 
 #### Links
-[//]: # (TODO: links)
+[code](https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend/src/scaffolder/actions/builtin/catalog/register.ts)
 
 ### `catalog:register:plus`
-[//]: # (TODO:)
+Registers entities from a catalog descriptor file in the software catalog.
 #### Inputs
 
+| **Key**              | **Description**                                                             | **Type**       | **Example** |
+|----------------------|-----------------------------------------------------------------------------|----------------|-------------|
+| `catalogInfoUrl`      | An absolute URL pointing to the catalog info file location                  | `string`       |             |
+| `optional`            | Permit the registered location to optionally exist. Default: `false`        | `boolean`      |             |
+
+
+
+
 #### Examples
+```yaml
+steps:
+  - action: catalog:register:plus
+    id: register-with-catalog
+    name: Register with the catalog
+    input:
+      infos:
+        - catalogInfoUrl: http://github.com/backstage/backstage/blob/master/catalog-info.yaml
+
+```
 
 #### Outputs
+| **Key**              | **Description**                                         | **Type**     |
+|----------------------|---------------------------------------------------------|--------------|
+| `entityRef`           | Reference to the entity that was registered             | `string`     |
+| `catalogInfoUrl`      | The URL of the catalog info that was registered         | `string`     |
+
 
 #### Links
-https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-plus/blob/HEAD/exemples.md#register-with-the-catalog-1
+[code](https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-plus/blob/29e02a71d9488efa726d805a86d25c15dd5b6a37/src/actions/builtin/catalog/register.ts)
 
 ### `catalog:write`
 This action creates a `catalog-info.yaml` file into the workspace directory. It takes an object that will be serialized as YAML into the body of the file.
@@ -668,7 +765,7 @@ steps:
 None
 
 #### Links
-[//]: # (TODO: links)
+[code](https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend/src/scaffolder/actions/builtin/catalog/write.ts)
 
 ### `catalog:fetch`
 
@@ -723,77 +820,181 @@ steps:
 An `entity` object following the [schema of Backstage entities](https://backstage.io/docs/features/software-catalog/descriptor-format/) or `entities` which is an array of entity objects. 
 
 #### Links
-[//]: # (TODO: links)
+[code](https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend/src/scaffolder/actions/builtin/catalog/fetch.ts)
 
 ### `catalog:query:plus`
-[//]: # (TODO:)
+Creates a template action that queries a catalog using provided filters, fields, and ordering parameters. It utilizes Backstage's `CatalogApi` for fetching catalog entities and allows customization through a schema for input and output data.
+
 #### Inputs
+| **Key**            | **Description**          | **Type**                 | **Example** |
+|--------------------|--------------------------|--------------------------|-------------|
+| `fields`           | Fields to be retrieved    | `array` of `string`       |             |
+| `limit`            | Limit for query results   | `number`                 |             |
+| `filter`           | Filter query for entities | `any`                    |             |
+| `orderFields.field`| Field to order by         | `string`                 |             |
+| `orderFields.order`| Sort order                | `string`, enum: `asc`, `desc` |             |
+| `fullTextFilter.term` | Search term for full-text filtering | `string`        |             |
+| `fullTextFilter.fields`| Fields for full-text filtering | `array` of `string` |             |
 
 #### Examples
+```yaml
+steps:
+  - action: catalog:query:plus
+    id: query-in-catalog
+    name: Query in catalog
+    input:
+      queries:
+        - limit: 2
+          fields:
+            - metadata.name
+          filter:
+            metadata.annotations.backstage.io/template-origin: template:default/java-api
+            relations.dependsOn: ${{ parameters.component_ref }}
+```
+This step queries the catalog for up to 2 entities, retrieving only the `metadata.name` field, filtered by a specific template origin annotation and a dependency relation based on the provided `component_ref` parameter.
 
 #### Outputs
+| **Key**  | **Description**            | **Type**            |
+|----------|----------------------------|---------------------|
+| `results`| The queried catalog results | `array` of `array` of `Entity` |
+
 
 #### Links
-- [Code](https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-plus/blob/HEAD/exemples.md#catalogqueryplus)
+- [Code](https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-plus/blob/29e02a71d9488efa726d805a86d25c15dd5b6a37/src/actions/builtin/catalog/query.ts)
 
 ### `catalog:relation:plus`
-[//]: # (TODO:)
+Query entities based on relations. It uses a schema-based validation approach for input and output, interacting with a catalog of entities through a `CatalogClient`.
+
 #### Inputs
+| **Key**               | **Description**                                                  | **Type**                          | **Example** |
+|-----------------------|------------------------------------------------------------------|-----------------------------------|-------------|
+| `relations`           | List of entity relations.                                        | `array` of `object`               |             |
+| `relations.type`       | The type of the relation.                                        | `string`                          |             |
+| `relations.targetRef`  | The entity reference of the target for this relation.            | `string`                          |             |
+| `optional`            | Optional flag indicating whether the property is optional.       | `boolean` or `undefined`          |             |
+| `defaultKind`         | Default kind for the entity.                                     | `string` or `undefined`           |             |
+| `defaultNamespace`     | Default namespace for the entity.                                | `string` or `undefined`           |             |
+| `relationType`        | The type of relation for the entity.                             | `string` or `undefined`           |             |
 
 #### Examples
+```yaml
+steps:
+  - action: catalog:relation:plus
+    id: query-in-relations
+    name: Query in relations
+    input:
+      queries:
+        - relations:
+            - type: apiProvidedBy
+              targetRef: component/default:customers-service
+            - type: ownedBy
+              targetRef: group/default:dream-devs
+          optional: true
+          relationType: apiProvidedBy
+```
+
+This step defines an action `catalog:relation:plus` to query entity relations, filtering by the apiProvidedBy relation type, with optional entities related to customers-service and dream-devs.
 
 #### Outputs
+| **Key**     | **Description**                                   | **Type**                  |
+|-------------|---------------------------------------------------|---------------------------|
+| `results`   | List of entities (or null) matching the query.    | `array` of `array` of `Entity` or `null` |
+
 
 #### Links
-- [Code](https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-plus/blob/HEAD/exemples.md#catalogrelationplus)
+- [Code](https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-plus/blob/29e02a71d9488efa726d805a86d25c15dd5b6a37/src/actions/builtin/catalog/relations.ts)
 
 ### catalog:timestamping
-[//]: # (TODO:)
-#### Inputs
+Adds the `backstage.io/createdAt` annotation containing the current timestamp to your entity object#### Inputs
 
 #### Examples
-
+```yaml
+steps:
+  - id: timestamp
+    name: Add Timestamp to catalog-info.yaml
+    action: catalog:timestamping
+```
 #### Outputs
 
 #### Links
-https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-annotator
+[npm package](https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-annotator)
 
 ### catalog:scaffolded-from
-[//]: # (TODO:)
+Adds `scaffoldedFrom` spec containing the template entityRef to your entity object
 #### Inputs
 
 #### Examples
+```yaml
+steps:
+  - id: append-templateRef
+    name: Append the entityRef of this template to the entityRef
+    action: catalog:scaffolded-from
+```
 
 #### Outputs
 
 #### Links
-https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-annotator
+[npm package](https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-annotator)
 
 ### catalog:annotate
-[//]: # (TODO:)
+Allows you to annotate your entity object with specified label(s), annotation(s) and spec property(ies)
 
 #### Inputs
 
 #### Examples
+```yaml
+steps:
+  - id: add-fields-to-catalog-info
+    name: Add a few fields into `catalog-info.yaml` using the generic action
+    action: catalog:annotate
+    input:
+      labels:
+        custom: ${{ parameters.label }}
+        other: "test-label"
+      annotations:
+        custom.io/annotation: ${{ parameters.label }}
+        custom.io/other: "value"
+```
 
 #### Outputs
 
 #### Links
-https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-annotator
+[npm package](https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-annotator)
 
 ## Notifications
 
 ### `notification:send`
-[//]: # (TODO:)
+Creates a template action for sending notifications via the Backstage Notification Service. It takes in recipients, severity, and other optional parameters, then sends notifications with the specified payload and error handling.
 
 #### Inputs
+| **Key**       | **Description**                                                                                       | **Type**               | **Example** |
+|---------------|-------------------------------------------------------------------------------------------------------|------------------------|-------------|
+| `recipients`  | The recipient of the notification, either broadcast or entity. If using entity, `entityRef` must be provided | `string` (enum: 'broadcast', 'entity') |             |
+| `entityRefs`  | The entity references to send the notification to, required if using recipient of entity               | `string[]`             |             |
+| `title`       | Notification title                                                                                     | `string`               |             |
+| `info`        | Notification description                                                                               | `string`               |             |
+| `link`        | Notification link                                                                                      | `string`               |             |
+| `severity`    | Notification severity                                                                                  | `string` (enum: 'low', 'normal', 'high', 'critical') |             |
+| `scope`       | Notification scope                                                                                     | `string`               |             |
+| `optional`    | Do not fail the action if the notification sending fails                                               | `boolean`              |             |
+
 
 #### Examples
-
+```yaml
+steps:
+  - id: sendNotification
+    action: notification:send
+    name: Send Notification
+    input:
+      recipients: broadcast
+      title: Test notification
+```
+This triggers the "send notification" action with a broadcast recipient and a title "Test notification"
 #### Outputs
+None
 
 #### Links
-https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-notifications/src/actions/sendNotification.ts
+[code](https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-notifications/src/actions/sendNotification.ts)
 
 ## File Operations
 
@@ -801,7 +1002,6 @@ https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-mo
 
 This action deletes the given files or directories in the workspace. It has one input parameter `files` that can be provided an array of file paths or directory paths to delete.
 
-If a directory is used, all the files inside a directory are deleted. If the given file or directory does not exist the function does nothing.
 
 #### Inputs
 
@@ -826,7 +1026,7 @@ steps:
 The `fs:delete` action does not have any outputs.
 
 #### Links
-[//]: # (TODO: links)
+[code](https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend/src/scaffolder/actions/builtin/filesystem/delete.ts)
 
 ### `fs:rename`
 
@@ -855,19 +1055,48 @@ steps:
 None
 
 #### Links
-[//]: # (TODO: links)
+[code](https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend/src/scaffolder/actions/builtin/filesystem/rename.ts)
 
 ### `fs:rename:plus
 
-[//]: # (TODO:)
+Defines a file renaming action for Backstage, allowing users to rename files and directories within a workspace.
+
 #### Inputs
+| **Key**              | **Description**                                         | **Type**        | **Example** |
+|----------------------|---------------------------------------------------------|-----------------|-------------|
+| `from`               | The source location of the file to be renamed            | `string`        |             |
+| `to`                 | The destination of the new file                         | `string`        |             |
+| `overwrite`          | Overwrite existing file or directory, default is `false`| `boolean?`      |             |
+| `files`              | Array of files to rename, each using `commonParams`      | `Array<object>` |             |
+| `commonParams`       | Optional shared parameters for all files                | `object?`       |             |
 
 #### Examples
+```yaml
+steps:
+  - action: fs:rename:plus
+    id: renameFiles
+    name: Rename files
+    input:
+      commonParams:
+        overwrite: true
+      files:
+        - from: file1.txt
+          to: file1Renamed.txt
+          overwrite: false
+        - from: file2.txt
+          to: file2Renamed.txt
+          overwrite: false
+        - from: file3.txt
+          to: file3Renamed.txt
+```
 
 #### Outputs
+| **Key**   | **Description**                        | **Type**        |
+|-----------|----------------------------------------|-----------------|
+| `results` | Array of results of the rename actions | `Array<any>`    |
 
 #### Links
-https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-plus/blob/HEAD/exemples.md#fsrenameplus`
+[code](https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-plus/blob/29e02a71d9488efa726d805a86d25c15dd5b6a37/src/actions/builtin/filesystem/rename.ts)
 
 ### `fs:append`
 
@@ -896,7 +1125,7 @@ steps:
 The `fs:append` action does not produce outputs.
 
 #### Links
-[//]: # (TODO: links)
+[code]()
 
 ### `fs:read`
 
@@ -1173,28 +1402,95 @@ The `roadiehq:utils:zip` action produces one output.
 [//]: # (TODO: links)
 
 ### `zip:decompress:plus`
-[//]: # (TODO:)
+Decompress ZIP files from various sources, such as base64, files, or URLs, and saves them to specified destinations while handling errors.
 
 #### Inputs
+| **Key**           | **Description**                                           | **Type**           | **Example** |
+|-------------------|-----------------------------------------------------------|--------------------|-------------|
+| `content`         | Zip File Content.                                         | `string`           |             |
+| `destination`     | Relative path of destination files.                       | `string`           |             |
+| `encoding`        | Indicate if input "content" field has encoded in "base64", "file" or "url". | `'base64' | 'file' | 'url'` |             |
+| `skipErrors`      | Not throw on errors, allowing next actions to proceed.     | `boolean`          |             |
 
 #### Examples
-
+```yaml
+steps:
+  - action: zip:decompress:plus
+    id: zip-decompress
+    name: Decompress multiple files.
+    input:
+      commonParams:
+        encoding: file
+      sources:
+        - content: ./compressed-1.zip
+          destination: ./tmp.zip-1/
+        - content: ./compressed-2.zip
+          destination: ./tmp.zip-2/
+```
+Defines a workflow step that decompresses multiple ZIP files (from local file paths) into specified destination directories using a custom zip:decompress:plus action.
 #### Outputs
-
+| **Key**         | **Description**                        | **Type**            |
+|-----------------|----------------------------------------|---------------------|
+| `results`       | List of results for each source input. | `Array<OutputFields>` |
+| `success`       | Indicates if the decompression was successful. | `boolean`        |
+| `files`         | List of decompressed files.            | `array`             |
+| `mode`          | File permissions mode.                 | `number`            |
+| `mtime`         | Modification time of the file.         | `string`            |
+| `path`          | Path of the decompressed file.         | `string`            |
+| `type`          | Type of the decompressed file (file/directory). | `string`        |
+| `errorMessage`  | Error message if decompression failed. | `string`            |
 #### Links
-https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-plus/blob/HEAD/exemples.md#zipdecompressplus
+[code](https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-plus/blob/29e02a71d9488efa726d805a86d25c15dd5b6a37/src/actions/builtin/zip/zip-decompress.ts)
 
 ### `glob:plus`
-[//]: # (TODO:)
+Allows users to match files using glob patterns and various options for customizing the file search.
 
 #### Inputs
 
+| **Key**                        | **Description**                                                                                              | **Type**         | **Example** |
+|---------------------------------|--------------------------------------------------------------------------------------------------------------|------------------|-------------|
+| `patterns`                      | List of glob patterns to match files.                                                                         | `array[string]`  |             |
+| `options.absolute`              | Return the absolute path for entries.                                                                         | `boolean`        |             |
+| `options.baseNameMatch`         | If set to `true`, patterns without slashes will be matched against the basename of the path if it contains slashes. | `boolean`        |             |
+| `options.braceExpansion`        | Enables Bash-like brace expansion.                                                                            | `boolean`        |             |
+| `options.caseSensitiveMatch`    | Enables a case-sensitive mode for matching files.                                                             | `boolean`        |             |
+| `options.concurrency`           | Specifies the maximum number of concurrent requests from a reader to read directories.                        | `number`         |             |
+| `options.deep`                  | Specifies the maximum depth of a read directory relative to the start directory.                              | `number`         |             |
+| `options.dot`                   | Allow patterns to match entries that begin with a period (`.`).                                               | `boolean`        |             |
+| `options.extglob`               | Enables Bash-like `extglob` functionality.                                                                    | `boolean`        |             |
+| `options.followSymbolicLinks`   | Indicates whether to traverse descendants of symbolic link directories.                                       | `boolean`        |             |
+| `options.globstar`              | Enables recursively repeating a pattern containing `**`.                                                      | `boolean`        |             |
+| `options.ignore`                | An array of glob patterns to exclude matches.                                                                 | `array[string]`  |             |
+| `options.markDirectories`       | Mark the directory path with the final slash.                                                                 | `boolean`        |             |
+| `options.objectMode`            | Returns objects (instead of strings) describing entries.                                                      | `boolean`        |             |
+| `options.onlyDirectories`       | Return only directories.                                                                                      | `boolean`        |             |
+| `options.onlyFiles`             | Return only files.                                                                                            | `boolean`        |             |
+| `options.stats`                 | Enables object mode (`objectMode`) with an additional `stats` field.                                          | `boolean`        |             |
+| `options.suppressErrors`        | Suppresses only `ENOENT` errors by default. Set to `true` to suppress any error.                              | `boolean`        |             |
+| `options.throwErrorOnBrokenSymbolicLink` | Throw an error when symbolic link is broken if `true`, or safely return `lstat` call if `false`.       | `boolean`        |             |
+| `options.unique`                | Ensures that the returned entries are unique.                                                                 | `boolean`        |             |
+| `options.gitignore`             | Respect ignore patterns in `.gitignore` files that apply to the globbed files.                                | `boolean`        |             |
+
+
 #### Examples
+```yaml
+steps:
+  - action: glob:plus
+    id: glob
+    name: List files
+    input:
+      patterns:
+        - "**/*.y[a?]ml"
+```
+This step uses the `glob:plus` action to list all files matching the pattern `"**/*.y[a?]ml"`, which includes `.yaml` and `.yml` files.
 
 #### Outputs
+| **Key**   | **Description**            | **Type**         |
+|-----------|----------------------------|------------------|
+| `results` | Array of matched file paths | `array[string]`  |
 
 #### Links
-https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-plus/blob/HEAD/exemples.md#globplus
+[code](https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-plus/blob/29e02a71d9488efa726d805a86d25c15dd5b6a37/src/actions/builtin/extras/glob.ts)
 
 ## Serialization
 
@@ -1262,6 +1558,9 @@ Converts JSON to a string format.
 | replacer | Array of keys that should be included in output. If specified, keys not in this array will be excluded.                                | `array`             | ['a', 'b', 'c']           |
 | space    | The number of spaces to add after each property. If >=1 it adds newlines after each property. If a string it adds that string instead. | `number` / `string` | 1                         |
 
+
+
+#### Examples
 ```yaml
 steps:
   - id: roadiehq-utils-serialize-json
@@ -1275,10 +1574,6 @@ steps:
         - c
       space: 1
 ```
-
-#### Examples
-[//]: # (TODO: examples)
-
 #### Outputs
 
 The `roadiehq:utils:serialize:json` action produces one output.
@@ -1288,28 +1583,131 @@ The `roadiehq:utils:serialize:json` action produces one output.
 | serialized | Output result from serialization | `string` |
 
 #### Links
-[//]: # (TODO: links)
+[Code](https://github.com/RoadieHQ/roadie-backstage-plugins/blob/main/plugins/scaffolder-actions/scaffolder-backend-module-utils/src/actions/serialize/json.ts)
 
 ## Parsing
 
 ### `xml`
-[//]: # (TODO:)
+Parse XML into JSON using various options and processing pipes, utilizing the `xml-js` library for conversion.
 
 #### Inputs
 
+| Key                    | Description                                                                                                       | Type           | Example |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------|----------------|---------|
+| content               | XML source content                                                                                               | `string`       |         |
+| encoding              | Indicate if input "content" field has encoded in "base64", "file", "raw" or "url".                            | `string`       |         |
+| options.pipes         | Ordered pipes to transform nodes values by type.                                                                | `object`       |         |
+| options.compact       | Whether to produce detailed object or compact object.                                                           | `boolean`      |         |
+| options.trim          | Whether to trim whitespace characters that may exist before and after the text.                                 | `boolean`      |         |
+| options.nativeType     | Whether to attempt converting text of numerals or boolean values to native type.                               | `boolean`      |         |
+| options.nativeTypeAttributes | Whether to attempt converting attributes of numerals or boolean values to native type.                  | `boolean`      |         |
+| options.addParent     | Whether to add parent property in each element object that points to parent object.                             | `boolean`      |         |
+| options.alwaysArray   | Whether to always put sub elements as an item inside an array.                                                  | `boolean`      |         |
+| options.alwaysChildren | Whether to always generate elements property even when there are no actual sub elements.                       | `boolean`      |         |
+| options.instructionHasAttributes | Whether to parse contents of Processing Instruction as attributes or not.                          | `boolean`      |         |
+| options.ignoreDeclaration | Whether to ignore parsing declaration property.                                                             | `boolean`      |         |
+| options.ignoreInstruction | Whether to ignore parsing processing instruction property.                                                  | `boolean`      |         |
+| options.ignoreAttributes | Whether to ignore parsing attributes of elements.                                                            | `boolean`      |         |
+| options.ignoreComment  | Whether to ignore parsing comments of the elements.                                                            | `boolean`      |         |
+| options.ignoreCdata   | Whether to ignore parsing CData of the elements.                                                                | `boolean`      |         |
+| options.ignoreDoctype  | Whether to ignore parsing Doctype of the elements.                                                             | `boolean`      |         |
+| options.ignoreText    | Whether to ignore parsing texts of the elements.                                                                | `boolean`      |         |
+
 #### Examples
+```yaml
+steps:
+  - action: xml
+    id: xml-parse
+    name: Parse xml files
+    input:
+      commonParams:
+        encoding: raw
+      sources:
+        - content: "<books><book>nature calls</book></books>"
+```
+Parse multiple Xmls contents from various sources types.
 
 #### Outputs
+| Key       | Description                   | Type         |
+|-----------|-------------------------------|--------------|
+| results   | Array of parsed XML objects.  | `array`      |
 
 #### Links
 https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-parsings/blob/main/src/actions/xml/xml.ts
 https://www.npmjs.com/package/@k3tech/backstage-plugin-scaffolder-backend-module-parsings
 
 ### `yaml`
+Parse YAML content from various sources using the Backstage scaffolder framework.
+
+#### Inputs
+| **Key**               | **Description**                                                           | **Type**               | **Example** |
+|-----------------------|---------------------------------------------------------------------------|------------------------|-------------|
+| `content`             | YAML source content                                                       | `string`               |             |
+| `encoding`            | Indicates if input "content" is encoded in "base64", "file", "raw", or "url" | `string`               |             |
+
+#### Examples
+```yaml
+steps:
+  - action: YAML_ID
+    id: yaml-parse
+    name: Parse yaml files
+    input:
+      commonParams:
+        encoding: raw
+      sources:
+        - content: |
+            key: value
+        - content: |
+            anotherkey: another value
+```
+This YAML defines a pipeline step that parses two YAML files using the action identified by `YAML_ID`, with `raw` encoding for the content.
+
+#### Outputs
+
+| **Key**   | **Description**                   | **Type**    |
+|-----------|-----------------------------------|-------------|
+| `results` | Array of parsed YAML content      | `array[]`   |
+
+
+#### Links
 https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-parsings/blob/main/src/actions/yaml/yaml.ts
 
 ### `json`
-https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-parsings/blob/main/src/actions/json/json.ts
+
+Process JSON data from various encoded content sources such as Base64, files, raw data, or URLs.
+
+#### Inputs
+
+| **Key**         | **Description**                                                                          | **Type**            | **Example** |
+|-----------------|------------------------------------------------------------------------------------------|---------------------|-------------|
+| `content`       | JSON source content                                                                      | `string`            |             |
+| `encoding`      | Indicates if input `content` field is encoded in `base64`, `file`, `raw`, or `url`.       | `string`            |             |
+| `sources`       | An array of fields containing the source JSON data and encoding information.              | `array` of `object` |             |
+| `commonParams`  | (Optional) Common parameters shared by multiple sources for content and encoding          | `Partial<FieldsType>`|             |
+
+#### Examples
+```yaml
+steps:
+  - action: json
+    id: json-parse
+    name: Parse Json files
+    input:
+      commonParams:
+        encoding: raw
+      sources:
+        - content: '{"key": "value"}'
+```
+
+This uses the `json` action to parse a raw JSON object from a content source with a common parameter of encoding set to "raw".
+
+#### Outputs
+
+| **Key**  | **Description**                    | **Type**      |
+|----------|------------------------------------|---------------|
+| `results`| Array of parsed JSON objects       | `array` of `object`|
+
+#### Links
+[code](https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-parsings/blob/main/src/actions/json/json.ts)
 
 ## Content manipulation
 
@@ -1547,72 +1945,522 @@ The `roadiehq:utils:json:merge` action produces one output.
 | path | Path to the file that got appended to | `string` |
 
 ### `regex:replace`
-https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-regex
+Validate an input structure using the `zod` library. 
+#### Inputs
+| Key           | Description                                                                 | Type                            | Example |
+|---------------|-----------------------------------------------------------------------------|---------------------------------|---------|
+| `regExps`     | Array of regex objects with patterns, flags, replacements, and values       | `array`                         |         |
+| `pattern`     | The regex pattern to match the value, like in `String.prototype.replace()`   | `string`                        |         |
+| `flags`       | Optional array of regex flags (`g`, `m`, `i`, `y`, `u`, `s`, `d`)           | `array`                         |         |
+| `replacement` | The replacement value for the regex, like in `String.prototype.replace()`    | `string`                        |         |
+| `values`      | Array of objects containing key-value pairs for regex input values           | `array`                         |         |
+| `key`         | Key to access the regex value                                               | `string`                        |         |
+| `value`       | Input value of the regex                                                    | `string`                        |         |
+#### Examples
+```yaml
+steps:
+  - id: regexValues
+    action: regex:replace
+    name: Regex Values
+    input:
+      regExps:
+        - pattern: 'dog'
+          replacement: 'monkey'
+          values:
+            - key: 'eg1'
+              value: exampleValue
+```
+Defines a workflow step that processes regex values by replacing instances of "dog" with "monkey" in the provided input value.
+
+#### Outputs
+| Key        | Description                                                            | Type     |
+|------------|------------------------------------------------------------------------|----------|
+| `pattern`  | A validated regex pattern that can be passed to the RegExp constructor  | `string` |
+| `flags`    | A validated set of flags that modify regex behavior                    | `array`  |
+| `values`   | Validated key-value pairs of regex input                               | `array`  |
+
+#### Links
+[code](https://github.com/janus-idp/backstage-plugins/blob/main/plugins/regex-actions/src/actions/regex/replace.ts)
+[npm package](https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-regex)
 
 ### `regex:fs:replace:plus`
-https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-plus/blob/HEAD/exemples.md#regexfsreplaceplus
+Enable regex-based search and replacement across files using glob patterns.
+
+#### Inputs
+| **Key**         | **Description**                                                             | **Type**    | **Example** |
+|-----------------|-----------------------------------------------------------------------------|-------------|-------------|
+| `pattern`       | Regex expression to evaluate in file contents from `file`.                  | `string`    |             |
+| `glob`          | Expression glob to find files to evaluate                                   | `string`    |             |
+| `replacement`   | Replacement expression based on the `pattern` field                         | `string`    |             |
+| `flags`         | Regex flags like d, g, i, m, s, u, v or y (optional)                        | `string`    |             |
+
+#### Examples
+Replace in files using Regex and Glob
+
+```yaml
+steps:
+  - action: regex:fs:replace:plus
+    id: regex-fs-replace
+    name: Replace in files
+    input:
+      glob: "**/*.y[a?]ml"
+      pattern: a
+      replacement: b
+      flags: g
+
+```
+Replace on xml keeping original indentarion useful to Yaml, Json and XML formats.
+
+```yaml
+steps:
+  - action: regex:fs:replace:plus
+    id: regex-fs-replace
+    name: Append spring-kafka
+    input:
+      pattern: ([\t ]+)</dependencies>
+      glob: pom.xml
+      replacement: |-
+        $1	<dependency>
+        $1		<!-- added from backstage -->
+        $1		<groupId>org.springframework.kafka</groupId>
+        $1		<artifactId>spring-kafka</artifactId>
+        $1	</dependency>
+        $1</dependencies>
+
+```
+
+#### Outputs
+
+| **Key**   | **Description**                                   | **Type**     |
+|-----------|---------------------------------------------------|--------------|
+| `results` | Array containing objects with the results of the regex operation | `array<object>` |
+
+
+#### Links
+[Code](https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-plus/blob/29e02a71d9488efa726d805a86d25c15dd5b6a37/src/actions/builtin/extras/regex-fs-replace.ts)
 
 ## Other utils
 
 ### `uuid:v4:gen:plus`
-https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-plus/blob/HEAD/exemples.md#uuidv4genplus
+Generates a list of UUIDv4 values, with inputs for specifying the number of UUIDs and outputs in the form of an array of generated UUID strings.
+
+#### Inputs
+
+| **Key**          | **Description**             | **Type**      | **Example** |
+|------------------|-----------------------------|---------------|-------------|
+| `amount`         | Amount of UUIDs to generate  | `number`      |             |
+
+#### Examples
+Generate 3 UUID's
+
+```yaml
+steps:
+  - action: uuid:v4:gen:plus
+    id: uuid-v4-gen
+    name: UUID gen
+    input:
+      amount: 3
+
+```
+
+#### Outputs
+
+| **Key**         | **Description**                      | **Type**    |
+|-----------------|--------------------------------------|-------------|
+| `results`       | List of generated UUIDs (UUIDv4)     | `array<string>` | 
+
+#### Links
+[Code](https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-plus/blob/29e02a71d9488efa726d805a86d25c15dd5b6a37/src/actions/builtin/extras/uuid.ts)
 
 ### `vars:plus`
-https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-plus/blob/HEAD/exemples.md#varsplus
+Handle and log input variables, and return the same input as the output in a formatted structure.
 
+#### Inputs
+| **Key**    | **Description**         | **Type**      | **Example** |
+|------------|-------------------------|---------------|-------------|
+| `input`    | The input object passed to the action | `object` |             |
+
+#### Examples
+Proxy vars to reuse on next actions
+
+```yaml
+steps:
+  - action: vars:plus
+    id: reusable-vars
+    name: Proxy vars
+    input:
+      foo: my-prefixed-${{ parameters.name | lower }}-foo
+      bar: bar-${{ parameters.value | lower }}
+
+```
+
+#### Outputs
+| **Key**    | **Description**           | **Type**    |
+|------------|---------------------------|-------------|
+| `result`   | Parsed input parameters    | `object`    |
+
+#### Links
+[Code](https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-plus/blob/29e02a71d9488efa726d805a86d25c15dd5b6a37/src/actions/builtin/extras/vars.ts)
 
 # Language / protocol / infrastructure
 
 ## Git
 
 ### `git`
-https://www.npmjs.com/package/@mdude2314/backstage-plugin-scaffolder-git-actions
+Allows execution of Git commands within a specified working directory.
+
+#### Inputs
+
+| **Key**                | **Description**                                                                 | **Type**       | **Example** |
+|------------------------|---------------------------------------------------------------------------------|----------------|-------------|
+| `command`              | The Git command to run                                                           | `string`       |             |
+| `workingDirectory`      | Working directory within the scaffolder workspace to execute the command in      | `string`       |             |
+| `args`                 | Arguments to pass to the Git command                                             | `string[]`     |             |
+
+#### Examples
+```yaml
+ steps:
+    - id: git
+      name: git
+      action: git
+      input:
+        command: ${{ parameters.command }} # ex: 'commit' - will make the scaffolder run the `git commit` command
+        workingDirectory: ${{ parameters.workingDirectory }} # ex: './my-working-directory' - will execute the command in the specified directory relative to the scaffolder workspace
+        args: ${{ parameters.args }} # ex: ['-m', 'My commit message'] - will add '-m My commit message' to the arguments passed to the git command
+```
+Example of using the generic git action.
+#### Outputs
+None
+
+#### Links
+[Code](https://github.com/arhill05/backstage-plugin-scaffolder-git-actions/blob/master/src/actions/git.ts)
+[Package](https://www.npmjs.com/package/@mdude2314/backstage-plugin-scaffolder-git-actions)
 
 ## HCL
 
 ### `hcl:merge`
-[//]: # (TODO:)
+Create an action for merging two HCL contents.
+
+#### Inputs
+
+| Key               | Description                       | Type                | Example |
+|-------------------|-----------------------------------|---------------------|---------|
+| `aSourceContent`  | The HCL content to be merged      | `string`            |         |
+| `bSourceContent`  | The HCL content to be merged      | `string`            |         |
+
+#### Examples
+
+#### Outputs
+| Key   | Description                     | Type       |
+|-------|---------------------------------|------------|
+| `hcl` | The merged HCL content          | `string`   |
+
+#### Links
 https://github.com/seatgeek/backstage-plugins/blob/main/plugins/scaffolder-backend-module-hcl/src/actions/hcl/hcl.ts
 
 ### `hcl:merge:write`
-[//]: # (TODO:)
-https://github.com/seatgeek/backstage-plugins/blob/main/plugins/scaffolder-backend-module-hcl/src/actions/hcl/hcl.ts
+Merge two HCL content strings and write the merged result to a specified output path.
+
+#### Inputs
+
+| Key               | Description                                        | Type         | Example |
+|-------------------|----------------------------------------------------|--------------|---------|
+| `aSourceContent`  | The HCL content to be merged                       | `string`     |         |
+| `bSourceContent`  | The HCL content to be merged                       | `string`     |         |
+| `outputPath`      | The path to write the merged HCL content to       | `string`     |         |
+
+#### Examples
+
+#### Outputs
+None
+
+
+#### Links
+[Code](https://github.com/seatgeek/backstage-plugins/blob/main/plugins/scaffolder-backend-module-hcl/src/actions/hcl/hcl.ts)
 
 ### `hcl:merge:files`
-[//]: # (TODO:)
+Merge two HCL files specified by their paths.
+
+#### Inputs
+| Key          | Description                                        | Type              | Example |
+|--------------|----------------------------------------------------|-------------------|---------|
+| `aSourcePath` | The path to the HCL file to be merged             | `string`          |         |
+| `bSourcePath` | The path to the HCL file to be merged             | `string`          |         |
+
+#### Examples
+
+#### Outputs
+| Key | Description                                  | Type     |
+|-----|----------------------------------------------|----------|
+| `hcl` | The merged HCL content from the two files   | `string` |
+
+#### Links
 https://github.com/seatgeek/backstage-plugins/blob/main/plugins/scaffolder-backend-module-hcl/src/actions/hcl/hcl.ts
 
 ### `hcl:merge:files:write`
-[//]: # (TODO:)
+Merge two HCL files and writing the merged content to a specified output path, with input validation using Zod.
+
+#### Inputs
+| Key          | Description                                        | Type             | Example |
+|--------------|----------------------------------------------------|------------------|---------|
+| `aSourcePath` | The path to the HCL file to be merged              | `string`         |         |
+| `bSourcePath` | The path to the HCL file to be merged              | `string`         |         |
+| `outputPath`  | The path to write the merged HCL content to        | `string`         |         |
+
+#### Examples
+
+#### Outputs
+None
+
+#### Links
 https://github.com/seatgeek/backstage-plugins/blob/main/plugins/scaffolder-backend-module-hcl/src/actions/hcl/hcl.ts
 
 ## Pulumi
 
 ### `pulumi:new`
+Action for creating a new Pulumi project, including input validation and execution of necessary commands to set up the project.
+#### Inputs
+
+| Key            | Description                                                                            | Type                                     | Example |
+|----------------|----------------------------------------------------------------------------------------|------------------------------------------|---------|
+| `template`     | The Pulumi template to use, this can be a built-in template or a URL to a template   | `string`                                 |         |
+| `stack`        | The name of the Pulumi stack                                                           | `string`                                 |         |
+| `organization` | The organization to which the Pulumi stack belongs                                     | `string`                                 |         |
+| `name`         | The name of the Pulumi project                                                          | `string`                                 |         |
+| `description`  | The Pulumi project description to use                                                  | `string`                                 |         |
+| `config`       | The Pulumi project config to use                                                       | `object`                                 |         |
+| `secretConfig` | The Pulumi project secret config to use                                                | `object`                                 |         |
+| `args`         | The Pulumi command arguments to run                                                    | `string[]`                               |         |
+| `folder`       | The folder to run Pulumi in                                                            | `string`                                 |         |
+
+#### Examples
+```yaml
+steps:
+  - id: pulumi-new-component
+    name: Cookie cut the component Pulumi project
+    action: pulumi:new
+    input:
+      name: "${{ parameters.component_id }}-infrastructure"
+      description: ${{ parameters.description | dump }}
+      organization: ediri
+      stack: ${{ parameters.stack }}
+      template: "https://github.com/my-silly-organisation/microservice-civo/tree/main/infrastructure-${{ parameters.cloud }}-${{ parameters.language }}"
+      config:
+        "node:node_count": "${{ parameters.nodeCount }}"
+      folder: .
+```
+This example creates a new Pulumi project for a component, using specified parameters such as name, description, organization, stack, template URL, configuration settings, and folder.
+#### Outputs
+None
+#### Links
 https://github.com/pulumi/pulumi-backstage-plugin/tree/main/plugins/backstage-scaffolder-backend-pulumi#pulumi-new-action
+
 ### `pulumi:up`
+Runs Pulumi to manage cloud resources, either in a local or remote workspace based on the provided configuration.
+#### Inputs
+
+| Key                          | Description                                                                    | Type                                                                                     | Example |
+|------------------------------|--------------------------------------------------------------------------------|------------------------------------------------------------------------------------------|--------|
+| `stack`                       | The name of the Pulumi stack.                                                 | `string`                                                                                 |        |
+| `organization`               | The organization name for the Pulumi stack.                                  | `string`                                                                                 |        |
+| `name`                       | The name of the Pulumi project.                                               | `string`                                                                                 |        |
+| `deployment`                 | This flag indicates that Pulumi Deployment will be used.                     | `boolean`                                                                                |        |
+| `repoUrl`                    | The Pulumi project repo URL to use, when using Pulumi Deployment.            | `string`                                                                                 |        |
+| `repoBranch`                 | The Pulumi project repo branch to use, when using Pulumi Deployment.         | `string`                                                                                 |        |
+| `repoProjectPath`            | The Pulumi project repo path to use, when using Pulumi Deployment.           | `string`                                                                                 |        |
+| `config`                     | The Pulumi project config to use.                                            | `object`                                                                                 |        |
+| `providerCredentialsFromEnv` | The Pulumi project provider credentials to use.                              | `array of string`                                                                        |        |
+| `secretConfig`               | The Pulumi project secret config to use.                                     | `object`                                                                                 |        |
+| `outputs`                    | The Pulumi project outputs to return.                                        | `array of string`                                                                        |        |
+| `preRunCommands`             | The Pulumi project pre-run commands to execute.                              | `array of string`                                                                        |        |
+| `suppressProgress`           | Suppress progress output.                                                    | `boolean`                                                                                |        |
+
+
+#### Examples
+```yaml
+steps:
+    - id: pulumi-deploy-infrastructure
+      name: Deploy the infrastructure using Pulumi CLI
+      action: pulumi:up
+      input:
+        deployment: false
+        name: "${{ parameters.component_id }}-infrastructure"
+        repoUrl: "https://github.com/${{ (parameters.repoUrl | parseRepoUrl)['owner'] }}/${{ (parameters.repoUrl | parseRepoUrl)['repo'] }}"
+        repoProjectPath: .
+        organization: ediri
+        outputs:
+          - kubeconfig
+          - ClusterId
+        stack: ${{ parameters.stack }}
+```
+This example uses the Pulumi CLI to deploy infrastructure, specifying parameters such as the deployment type, project details, organization name, stack, and the expected outputs.
+#### Outputs
+| Key        | Description                           | Type                                                           |
+|------------|---------------------------------------|----------------------------------------------------------------|
+| (dynamic)  | The Pulumi project outputs to return. | `record of { [key: string]: { value: any; } }`                |
+
+#### Links
 https://github.com/pulumi/pulumi-backstage-plugin/tree/main/plugins/backstage-scaffolder-backend-pulumi#pulumi-up-action
 
 ## Kubernetes
 
 ### `kubernetes:create-namespace`
-[//]: # (TODO:)
+Creates a Kubernetes namespace, leveraging Kubernetes API and Backstage's catalog client to fetch cluster information.
+
+#### Inputs
+| Key          | Description                                                                 | Type         | Example |
+|--------------|-----------------------------------------------------------------------------|--------------|---------|
+| `namespace`  | Name of the namespace to be created                                         | `string`     |         |
+| `clusterRef` | Cluster resource entity reference from the catalog                          | `string`     |         |
+| `url`       | URL of the Kubernetes API, used if `clusterRef` is not provided            | `string`     |         |
+| `token`      | Bearer token to authenticate with                                           | `string`     |         |
+| `skipTLSVerify` | Skip TLS certificate verification, not recommended for production use, defaults to false | `boolean`    |         |
+| `caData`     | Certificate Authority base64 encoded certificate                            | `string`     |         |
+| `labels`     | Labels that will be applied to the namespace.                              | `string`     |         |
+
+#### Examples
+```yaml
+steps:
+    - id: create-kubernetes-namespace
+      name: Create kubernetes namespace
+      action: kubernetes:create-namespace
+      input:
+        namespace: ${{ parameters.namespace }}
+        clusterRef: ${{ parameters.clusterRef }}
+        url: ${{ parameters.url }}
+        token: ${{ parameters.token }}
+        skipTLSVerify: ${{ parameters.skipTLSVerify }}
+        caData: ${{ parameters.caData }}
+        labels: ${{ parameters.labels }}
+```
+This example creates a Kubernetes namespace using the `kubernetes:create-namespace` action, with inputs sourced from specified parameters.
+
+#### Outputs
+None
+
+
+
+#### Links
 https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-kubernetes-dynamic
+https://github.com/janus-idp/backstage-plugins/tree/main/plugins/kubernetes-actions
 
 ### `deploy:kubernetes`
-[//]: # (TODO:)
+Action for deploying Kubernetes manifests within a Backstage application, using the Kubernetes API to apply the provided YAML or JSON resources.
+
+In this format, the **Inputs** table summarizes the parameters required for the action, while the **Outputs** table outlines the expected output from the action.
+#### Inputs
+| Key          | Description                                                 | Type         | Example |
+|--------------|-------------------------------------------------------------|--------------|---------|
+| `manifest`   | YAML or JSON manifest for the Kubernetes resource to be applied | `any`        |         |
+| `clusterUrl` | URL of the Kubernetes API                                  | `string`     |         |
+| `authToken`  | Bearer token to authenticate with the Kubernetes API       | `string`     |         |
+
+#### Examples
+
+#### Outputs
+
+| Key         | Description                                           | Type                |
+|-------------|-------------------------------------------------------|---------------------|
+| `result`    | Result of the applied Kubernetes manifest             | `KubernetesObject`  |
+
+#### Links
 https://github.com/pfeifferj/backstage-plugin-scaffolder-kubernetes-deploy/blob/main/src/actions/k8s-apply.ts
 
 ### `kube:apply`
-[//]: # (TODO:)
+Action for applying Kubernetes manifests in a Backstage application.
+#### Inputs
+
+| Key        | Description                                                   | Type            | Example |
+|------------|---------------------------------------------------------------|------------------|---------|
+| `manifest` | The resource manifest to apply in the Platform cluster        | `string`         |         |
+| `namespaced` | Whether the API is namespaced or not                        | `boolean`        |         |
+#### Examples
+```yaml
+steps:
+    - action: kube:apply
+      id: k-apply
+      name: Create a Resouce
+      input:
+        namespaced: true
+        manifest: |
+          apiVersion: example.group.bar/v1
+          kind: Foo
+          metadata:
+            name: ${{ parameters.name }}
+            namespace: default
+```
+
+#### Outputs
+
+| Key             | Description                                               | Type            |
+|-----------------|-----------------------------------------------------------|------------------|
+| `metadata`      | Metadata about the applied resource                       | `object`        |
+| `namespace`     | The namespace of the applied resource                     | `string`        |
+| `name`          | The name of the applied resource                          | `string`        |
+| `response`      | The response object from the Kubernetes API              | `object`        | 
+
+#### Links
 https://github.com/kirederik/backstage-k8s-scaffolder-actions/blob/main/src/actions/apply.ts
 
 ### `kube:delete`
-[//]: # (TODO:)
+Action for deleting Kubernetes resources.
+
+#### Inputs
+| Key          | Description                                 | Type           | Example |
+|--------------|---------------------------------------------|----------------|---------|
+| `apiVersion` | The apiVersion of the resource              | `string`       |         |
+| `kind`      | The kind of the resource                    | `string`       |         |
+| `name`      | The name of the resource                    | `string`       |         |
+| `namespace`  | The namespace of the resource               | `string`       |         |
+
+#### Examples
+```yaml
+steps:
+    - action: kube:delete
+      id: k-delete
+      name: Delete
+      input:
+        apiVersion: example.group.bar/v1
+        kind: Foo
+        namespace: ${{parameters.namespace}}
+        name: ${{ parameters.name }}
+```
+
+#### Outputs
+None
+
+#### Links
 https://github.com/kirederik/backstage-k8s-scaffolder-actions/blob/main/src/actions/delete.ts
 
 ### `kube:job:wait`
-[//]: # (TODO:)
+Action that waits for a Kubernetes job to complete based on specified labels and a namespace.
+
+Note: The output properties for `conditions` have been generalized; you may want to specify the exact structure depending on your use case.
+#### Inputs
+
+| Key       | Description                                                   | Type                                 | Example |
+|-----------|---------------------------------------------------------------|--------------------------------------|---------|
+| labels    | The labels of the job resource to wait on                    | `Record<string, string>`            |         |
+| namespace | The namespace of the resource to wait on, e.g. default       | `string`                             |         |
+
+#### Examples
+```yaml
+steps:
+  - action: kube:job:wait
+    id: k-wait
+    name: Wait for a Job to complete
+    input:
+      labels:
+        job-name: foo-bar
+        # more labels
+```
+This is a step example that waits for a Kubernetes job with the label `job-name: foo-bar` to complete, using the `kube:job:wait` action and assigning it the ID `k-wait`.
+#### Outputs
+| Key        | Description                                                   | Type                                 |
+|------------|---------------------------------------------------------------|--------------------------------------|
+| conditions | The conditions of the job once it has completed               | `Array<{ type: string; status: string; ... }>` | 
+
+#### Links
 https://github.com/kirederik/backstage-k8s-scaffolder-actions/blob/main/src/actions/wait.ts
 
 ## Maven
@@ -1626,62 +2474,146 @@ https://www.npmjs.com/package/@gcornacchia/backstage-plugin-scaffolder-maven-act
 ## Ansible
 
 ### `ansible:jobTemplate:launch`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/KiwiGDC/backstage-kawx/blob/main/plugins/scaffolder-backend-module-kawx/src/actions/run/run.ts
 
 ### `ansible-controller:job_template:launch`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@mycloudlab/scaffolder-backend-module-ansible-controller
 
 ## ArgoCD
 
 ### `argocd:create-resources`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 
 ## AWS
 
 ### `roadiehq:aws:s3:cp`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 
 ### `roadiehq:aws:ecr:create`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 
 ### `roadiehq:aws:secrets-manager:create`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 
 ### `opa:get-env-providers`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@aws/plugin-scaffolder-backend-aws-apps-for-backstage
 
 ### `opa:create-secret`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@aws/plugin-scaffolder-backend-aws-apps-for-backstage
 
 ### `opa:createRepoAccessToken:gitlab`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@aws/plugin-scaffolder-backend-aws-apps-for-backstage
 
 ### `opa:get-platform-metadata`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@aws/plugin-scaffolder-backend-aws-apps-for-backstage
 
 ### `opa:get-ssm-parameters`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@aws/plugin-scaffolder-backend-aws-apps-for-backstage
 
 ### `aws:cloudcontrol:create`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@alithya-oss/plugin-scaffolder-backend-module-aws-core
 
 ## Azure
 
 ### `publish:azure`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-azure/src/actions/azure.ts
 
 ### `azure:repo:clone`
 
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 
 Clone a repo from Azure DevOps into the workspace. See input options [in the application](/docs/scaffolder/writing-templates/#actions)
 
@@ -1696,12 +2628,24 @@ Clone a repo from Azure DevOps into the workspace. See input options [in the app
 ```
 
 ### `git:clone:azure`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 clone multiple repos
 https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-azure-devops/blob/main/src/actions/repos/git-clone-azure.ts
 
 ### `azure:repo:push`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 Push changes to an Azure repository. See input options [in the application](/docs/scaffolder/writing-templates/#actions)
 
 ```yaml    
@@ -1715,7 +2659,13 @@ Push changes to an Azure repository. See input options [in the application](/doc
 ```
 
 ### `azure:repo:pr`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 Create a PR in Azure. See input options [in the application](/docs/scaffolder/writing-templates/#actions)
 
 ```yaml
@@ -1732,42 +2682,90 @@ Create a PR in Azure. See input options [in the application](/docs/scaffolder/wr
 ```
 
 ### `git:commit:azure`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 commit and push to branch
 https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-azure-devops/blob/main/src/actions/repos/git-commit-azure.ts
 
 ### `azure:pipeline:create`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-pipelines/tree/main
 https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-pipelines/blob/main/src/actions/run/createAzurePipeline.ts
 
 ### `pipeline:create:azure`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-azure-devops/blob/main/src/actions/piepline/pipeline-create-azure.ts
 
 ### `azure:pipeline:run`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-pipelines/tree/main
 https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-pipelines/blob/main/src/actions/run/runAzurePipeline.ts
 
 ### `azure:pipeline:permit`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@parfuemerie-douglas/scaffolder-backend-module-azure-pipelines
 https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-pipelines/tree/main
 https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-pipelines/blob/main/src/actions/run/permitAzurePipeline.ts
 
 ### `azure:repo:clone`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@parfuemerie-douglas/scaffolder-backend-module-azure-repositories
 https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-repositories/blob/main/src/actions/run/cloneAzureRepo.ts
 
 ### `azure:repo:push`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@parfuemerie-douglas/scaffolder-backend-module-azure-repositories
 https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-repositories/blob/main/src/actions/run/pushAzureRepo.ts
 
 ### `azure:repo:pr`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@parfuemerie-douglas/scaffolder-backend-module-azure-repositories
 https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-repositories/blob/main/src/actions/run/pullRequestAzureRepo.ts
 
@@ -1851,77 +2849,167 @@ The `publish:bitbucket` action produces the following outputs.
 [//]: # (TODO: links)
 
 ### `publish:bitbucketCloud`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-bitbucket-cloud/src/actions/bitbucketCloud.ts
 
 ### `bitbucket:pipelines:run`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-bitbucket-cloud/src/actions/bitbucketCloudPipelinesRun.ts
 
 ### `publish:bitbucketCloud:pull-request`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-bitbucket-cloud/src/actions/bitbucketCloudPullRequest.ts
 
 ### `publish:bitbucketServer`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-bitbucket-server/src/actions/bitbucketServer.ts
 
 ### `publish:bitbucketServer:pull-request`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-bitbucket-server/src/actions/bitbucketServerPullRequest.ts
 
 ## CNEO
 
 ### `cnoe:kubernetes:apply`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/cnoe-io/plugin-scaffolder-actions/blob/HEAD/src/actions/k8s-apply.ts
 
 ### `cnoe:verify:dependency`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/cnoe-io/plugin-scaffolder-actions/blob/HEAD/src/actions/verify.ts
 
 ### `cnoe:utils:sanitize`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/cnoe-io/plugin-scaffolder-actions/blob/HEAD/src/actions/sanitize.ts
 
 ## Codacy
 
 ### `codacy:add-repo`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/codacy/backstage-plugin
 
 ## Confluence
 
 ### `confluence:transform:markdown`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/backstage/backstage/tree/master/plugins/scaffolder-backend-module-confluence-to-markdown
 
 ## Cue
 
 ### `cue:cueflow`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/shoukoo/backstage-plugin-scaffolder-cuelang/blob/main/src/actions/cueflow.ts
 
 ## Gerrit
 
 ### `publish:gerrit:review`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gerrit/src/actions/gerritReview.ts
 
 ### `publish:gerrit`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gerrit/src/actions/gerrit.ts
 
 ## Gitea
 
 ### `publish:gitea`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@backstage/plugin-scaffolder-backend-module-gitea
 
 ## GitHub
 
 ### `publish:github`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 
 This action creates a new GitHub repository and publishes the files in the workspace directory to the repository. There is one mandatory parameter `repoUrl`. The repo url picker described in the `string` parameter description above.
 
@@ -2096,7 +3184,13 @@ steps:
 ```
 
 ### `publish:github:pull-request`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-github/src/actions/githubPullRequest.ts
 
 This action creates a pull request against a pre-existing repository using the files contained in the workspace directory. 
