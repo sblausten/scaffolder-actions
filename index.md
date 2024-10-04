@@ -3264,7 +3264,20 @@ https://github.com/Parfuemerie-Douglas/scaffolder-backend-module-azure-repositor
 ### `publish:bitbucket`
 This action creates a new Bitbucket repository and publishes the files in the workspace directory to the repository. There is one mandatory parameter `repoUrl`. The repo url picker described in the `string` parameter description above.
 
-[//]: # (TODO: imputs)
+#### Input
+
+| **Key**               | **Description**                                                                                                        | **Type**       | **Example** |
+|-----------------------|------------------------------------------------------------------------------------------------------------------------|----------------|-------------|
+| `repoUrl`             | Repository Location                                                                                                    | `string`       |             |
+| `description`         | Repository Description                                                                                                 | `string`       |             |
+| `repoVisibility`      | Repository Visibility (private or public)                                                                              | `string`       |             |
+| `defaultBranch`       | Sets the default branch on the repository. The default value is 'master'                                                | `string`       |             |
+| `sourcePath`          | Path within the workspace that will be used as the repository root. If omitted, the entire workspace is used.           | `string`       |             |
+| `enableLFS`           | Enable LFS for the repository (only available for hosted Bitbucket).                                                    | `boolean`      |             |
+| `token`               | The token to use for authorization to BitBucket                                                                         | `string`       |             |
+| `gitCommitMessage`    | Sets the commit message on the repository. The default value is 'initial commit'                                        | `string`       |             |
+| `gitAuthorName`       | Sets the default author name for the commit. The default value is 'Scaffolder'                                          | `string`       |             |
+| `gitAuthorEmail`      | Sets the default author email for the commit.                                                                           | `string`       |             |
 
 #### Examples
 The `repoUrl` must be in the format `bitbucket.org?repo=<project name>&workspace=<workspace name>&project=<project name>`
@@ -3336,54 +3349,220 @@ The `publish:bitbucket` action produces the following outputs.
 | repoContentsUrl | Url that shows the contents of the repository |
 
 #### Links
-[//]: # (TODO: links)
+
 
 ### `publish:bitbucketCloud`
+Action that creates and initializes a Bitbucket Cloud repository and publishes content to it from a workspace.
+
 #### Inputs
+| **Key**              | **Description**                                                                 | **Type**         | **Example** |
+|----------------------|---------------------------------------------------------------------------------|------------------|-------------|
+| `repoUrl`            | Repository location                                                             | `string`         |             |
+| `description`        | Repository description                                                          | `string`         |             |
+| `repoVisibility`     | Repository visibility (private or public)                                        | `string`         |             |
+| `defaultBranch`      | Sets the default branch on the repository (default is 'master')                  | `string`         |             |
+| `gitCommitMessage`   | Sets the commit message on the repository (default is 'initial commit')          | `string`         |             |
+| `sourcePath`         | Path within the workspace to use as the repository root                          | `string`         |             |
+| `token`              | Authentication token for Bitbucket Cloud                                         | `string`         |             |
 
 #### Examples
+```yaml
+steps:
+  - id: publish
+    action: publish:bitbucketCloud
+    name: Publish to Bitbucket Cloud
+    input:
+      repoUrl: bitbucket.org?repo=repo&workspace=workspace&project=project
+      description: Initialize a git repository
+```
+This publishes content to Bitbucket Cloud by initializing a repository, providing the repository URL, workspace, project, and a description for the repository.
 
 #### Outputs
+| **Key**           | **Description**                                 | **Type**   |
+|-------------------|-------------------------------------------------|------------|
+| `remoteUrl`       | URL to the repository with the provider          | `string`   |
+| `repoContentsUrl` | URL to the root of the repository                | `string`   |
+| `commitHash`      | Git commit hash of the initial commit            | `string`   |
 
 #### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-bitbucket-cloud/src/actions/bitbucketCloud.ts
 
 ### `bitbucket:pipelines:run`
+Triggers a run of a Bitbucket Cloud pipeline using the Backstage framework.
+
 #### Inputs
 
+| **Key**            | **Description**                    | **Type**      | **Example** |
+|--------------------|------------------------------------|---------------|-------------|
+| `workspace`        | The Bitbucket workspace to run the pipeline in | `string`      |             |
+| `repo_slug`        | The repository identifier where the pipeline is triggered | `string`      |             |
+| `body`             | Optional body to pass to the pipeline trigger request | `object`      |             |
+| `token`            | Optional authorization token for Bitbucket API requests | `string`      |             |
+
+
 #### Examples
+```yaml
+steps:
+  - action: bitbucket:pipelines:run
+    id: run-bitbucket-pipeline
+    name: Run an example bitbucket pipeline
+    input:
+      workspace: test-workspace
+      repo_slug: test-repo-slug
+      body:
+        target:
+          commit:
+            type: commit
+            hash: a3c4e02c9a3755eccdc3764e6ea13facdf30f923
+          selector:
+            type: custom
+            pattern: Deploy to production
+          type: pipeline_ref_target
+          ref_name: master
+          ref_type: branch
+```
 
 #### Outputs
+| **Key**           | **Description**                     | **Type**      |
+|-------------------|-------------------------------------|---------------|
+| `buildNumber`     | The build number of the triggered pipeline | `number`      |
+| `repoUrl`         | A URL to the repository where the pipeline was triggered | `string`      |
+| `repoContentsUrl` | A URL to view the pipeline in Bitbucket Cloud | `string`      |
 
 #### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-bitbucket-cloud/src/actions/bitbucketCloudPipelinesRun.ts
 
 ### `publish:bitbucketCloud:pull-request`
+Action for publishing a pull request to a Bitbucket Cloud repository using Backstage's scaffolding system.
+
 #### Inputs
+
+| **Key**            | **Description**                                      | **Type**    | **Example** |
+|--------------------|------------------------------------------------------|-------------|-------------|
+| `repoUrl`          | Repository Location                                   | `string`    |             |
+| `title`            | Pull Request title                                    | `string`    |             |
+| `description`      | The description of the pull request                   | `string`    |             |
+| `targetBranch`     | Branch to apply changes to. Default is 'master'.      | `string`    |             |
+| `sourceBranch`     | Branch to copy changes from                           | `string`    |             |
+| `token`            | Token for authorization to Bitbucket Cloud            | `string`    |             |
+| `gitAuthorName`    | Author name for the commit. Default is 'Scaffolder'.  | `string`    |             |
+| `gitAuthorEmail`   | Author email for the commit                           | `string`    |             |
+
 
 #### Examples
 
+```yaml
+steps:
+  - action: 'publish:bitbucketCloud:pull-request'
+    id: 'publish-bitbucket-cloud-pull-request-target-branch'
+    name: 'Creating pull request on bitbucket cloud'
+    input:
+      repoUrl: 'bitbucket.org?workspace=workspace&project=project&repo=repo'
+      title: 'My pull request'
+      sourceBranch: 'my-feature-branch'
+      targetBranch: 'development'
+```
+
 #### Outputs
+| **Key**            | **Description**                          | **Type**    |
+|--------------------|------------------------------------------|-------------|
+| `pullRequestUrl`    | A URL to the pull request with the provider | `string`    |
 
 #### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-bitbucket-cloud/src/actions/bitbucketCloudPullRequest.ts
 
 ### `publish:bitbucketServer`
+Action for Backstage that initializes a Git repository and publishes it to Bitbucket Server, handling repository creation, commits, and optional Git Large File Storage (LFS) enablement.
+
+
 #### Inputs
+
+| **Key**              | **Description**                                                                                              | **Type**           | **Example** |
+|----------------------|--------------------------------------------------------------------------------------------------------------|--------------------|-------------|
+| `repoUrl`            | Repository Location                                                                                          | `string`           |             |
+| `description`        | Repository Description                                                                                        | `string`           |             |
+| `repoVisibility`     | Repository Visibility                                                                                         | `string (enum: ['private', 'public'])` |             |
+| `defaultBranch`      | Default branch on the repository (default value is 'master')                                                  | `string`           |             |
+| `sourcePath`         | Path within the workspace used as the repository root                                                         | `string`           |             |
+| `enableLFS`          | Enable Git Large File Storage (LFS) for the repository                                                        | `boolean`          |             |
+| `token`              | Authentication token for Bitbucket Server                                                                    | `string`           |             |
+| `gitCommitMessage`   | Git commit message (default value is 'initial commit')                                                        | `string`           |             |
+| `gitAuthorName`      | Author name for the commit (default value is 'Scaffolder')                                                    | `string`           |             |
+| `gitAuthorEmail`     | Author email for the commit                                                                                   | `string`           |             |
+
 
 #### Examples
 
+```yaml
+steps:
+  - action: publish:bitbucketServer
+    id: publish-bitbucket-server-minimal
+    name: Publish To Bitbucket Server
+    input:
+      repoUrl: 'hosted.bitbucket.com?project=project&repo=repo'
+      description: 'This is a test repository'
+      repoVisibility: 'private'
+      defaultBranch: 'main'
+      sourcePath: 'packages/backend'
+      enableLFS: false
+      token: 'test-token'
+      gitCommitMessage: 'Init check commit'
+      gitAuthorName: 'Test User'
+      gitAuthorEmail: 'test.user@example.com'
+```
+
+### Description
+This publishes a repository to Bitbucket Server, specifying repository details, visibility, commit information, and optional configuration like enabling LFS.
+
 #### Outputs
+
+| **Key**            | **Description**                                      | **Type**   |
+|--------------------|------------------------------------------------------|------------|
+| `remoteUrl`        | A URL to the repository with the provider             | `string`   |
+| `repoContentsUrl`  | A URL to the root of the repository                   | `string`   |
+| `commitHash`       | The git commit hash of the initial commit             | `string`   |
 
 #### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-bitbucket-server/src/actions/bitbucketServer.ts
 
 ### `publish:bitbucketServer:pull-request`
+Creates a custom action to publish a pull request to a Bitbucket Server repository.
+
 #### Inputs
+
+| **Key**            | **Description**                                             | **Type**    | **Example** |
+|--------------------|-------------------------------------------------------------|-------------|-------------|
+| `repoUrl`          | Repository Location (URL)                                    | `string`    |             |
+| `title`            | The title for the pull request                               | `string`    |             |
+| `description`      | The description of the pull request                          | `string`    |             |
+| `targetBranch`     | Branch of repository to apply changes to. Defaults to 'master'| `string`    |             |
+| `sourceBranch`     | Branch of repository to copy changes from                    | `string`    |             |
+| `token`            | Authorization token for Bitbucket Server                     | `string`    |             |
+| `gitAuthorName`    | Author name for the commit. Defaults to 'Scaffolder'          | `string`    |             |
+| `gitAuthorEmail`   | Author email for the commit                                  | `string`    |             |
+
 
 #### Examples
 
+```yaml
+steps:
+  - action: publish:bitbucketServer:pull-request
+    id: publish-bitbucket-server-pull-request-minimal
+    name: Creating pull request on bitbucket server
+    input:
+      repoUrl: hosted.bitbucket.com?project=project&repo=repo
+      title: My pull request
+      sourceBranch: my-feature-branch
+      description: This is a detailed description of my pull request
+```
+
+### Description:
+This YAML representation defines a single step in a workflow that creates a pull request on a Bitbucket Server, including action type, identification, name, and input parameters like repository URL, title, source branch, and description.
+
 #### Outputs
+| **Key**            | **Description**                                         | **Type**    |
+|--------------------|---------------------------------------------------------|-------------|
+| `pullRequestUrl`    | A URL to the pull request created in the Bitbucket Server | `string`    |
 
 #### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-bitbucket-server/src/actions/bitbucketServerPullRequest.ts
@@ -3391,31 +3570,63 @@ https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-mo
 ## CNEO
 
 ### `cnoe:kubernetes:apply`
+Action for applying Kubernetes manifests using `kubectl`, either from a string, an object, or a file path, with support for namespaced configurations and cluster authentication.
+
+
 #### Inputs
+| Key                 | Description                                                  | Type    | Example |
+|---------------------|--------------------------------------------------------------|---------|---------|
+| `manifestString`    | The manifest to apply in the cluster. Must be a string.     | `string`|         |
+| `manifestObject`    | The manifest to apply in the cluster. Must be an object.    | `object`|         |
+| `manifestPath`      | The path to the manifest file.                               | `string`|         |
+| `namespaced`        | Whether the API is namespaced or not.                        | `boolean`|         |
+| `clusterName`       | The name of the cluster to apply this.                       | `string`|         |
 
 #### Examples
 
 #### Outputs
+
+| Key   | Description                                                | Type    |
+|-------|------------------------------------------------------------|---------|
+|       | The object returned by Kubernetes by performing this operation | `object`|
 
 #### Links
 https://github.com/cnoe-io/plugin-scaffolder-actions/blob/HEAD/src/actions/k8s-apply.ts
 
 ### `cnoe:verify:dependency`
+Action for verifying dependencies using a specified command-line tool, where it checks for the existence of the command and executes it with provided verifiers.
+
 #### Inputs
+| Key         | Description                       | Type                  | Example |
+|-------------|-----------------------------------|-----------------------|---------|
+| verifiers   | The list of verifiers            | `array` of `string`   |         |
 
 #### Examples
 
 #### Outputs
+
+| Key         | Description                       | Type                  |
+|-------------|-----------------------------------|-----------------------|
+| None        | No specific output properties are defined in the schema. | N/A   |
 
 #### Links
 https://github.com/cnoe-io/plugin-scaffolder-actions/blob/HEAD/src/actions/verify.ts
 
 ### `cnoe:utils:sanitize`
+Action for sanitizing a YAML document by removing empty objects.
+
 #### Inputs
 
+| Key       | Description                         | Type   | Example |
+|-----------|-------------------------------------|--------|---------|
+| `document`| The document to be sanitized        | string |         |
 #### Examples
 
 #### Outputs
+
+| Key        | Description             | Type   |
+|------------|-------------------------|--------|
+| `sanitized`| The sanitized document   | string |         |
 
 #### Links
 https://github.com/cnoe-io/plugin-scaffolder-actions/blob/HEAD/src/actions/sanitize.ts
@@ -3423,11 +3634,34 @@ https://github.com/cnoe-io/plugin-scaffolder-actions/blob/HEAD/src/actions/sanit
 ## Codacy
 
 ### `codacy:add-repo`
+Action for adding a repository to Codacy using its API.
+
 #### Inputs
+| Key        | Description                        | Type   | Example |
+|------------|------------------------------------|--------|---------|
+| `provider` | The name of the code hosting provider. | `string` |         |
+| `owner`    | The username or organization name that owns the repository. | `string` |         |
+| `repository` | The name of the repository to add. | `string` |         |
 
 #### Examples
+```yaml
+steps:
+  - id: add-repo
+    name: Add Repository to Codacy
+    action: codacy:add-repo
+    input:
+      provider: gh|gl|bb
+      owner: your-organization-or-username
+      repository: ${{ parameters.repoName }}
+```
+
+This invokes the action `codacy:add-repo` to add a specified repository from a given code hosting provider (GitHub, GitLab, or Bitbucket) to Codacy, using the organization or username as the owner and a parameter for the repository name.
 
 #### Outputs
+
+| Key     | Description                              | Type   |
+|---------|------------------------------------------|--------|
+| `data`  | Response data from Codacy upon successful addition of the repository. | `object` |
 
 #### Links
 https://github.com/codacy/backstage-plugin
@@ -3435,75 +3669,214 @@ https://github.com/codacy/backstage-plugin
 ## Confluence
 
 ### `confluence:transform:markdown`
+Action that transforms Confluence content into Markdown format and updates a GitHub repository with the new Markdown files and modified `mkdocs.yml` configuration.
+
 #### Inputs
+| Key               | Description                                                                                                                           | Type         | Example |
+|-------------------|---------------------------------------------------------------------------------------------------------------------------------------|--------------|--------|
+| `confluenceUrls`  | Paste your Confluence URL. Ensure it follows this format: `https://{confluence+base+url}/display/{spacekey}/{page+title}` or `https://{confluence+base+url}/spaces/{spacekey}/pages/1234567/{page+title}` for Confluence Cloud. | array        |        |
+| `repoUrl`         | GitHub Repo URL, specifying the location of the `mkdocs.yml` file inside the GitHub repository where you want to store the document. | string       |        |
 
 #### Examples
 
 #### Outputs
+| Key      | Description                                     | Type   |
+|----------|-------------------------------------------------|--------|
+| `repo`   | The name of the repository.                     | string |
+| `owner`  | The owner of the repository.                    | string |
 
 #### Links
 https://github.com/backstage/backstage/tree/master/plugins/scaffolder-backend-module-confluence-to-markdown
 
 ## Cue
+Action for the Backstage scaffolder that fetches template content, runs a Cue command, and copies output files to a specified directory.
 
 ### `cue:cueflow`
 #### Inputs
+| Key           | Description                                                                             | Type    | Example |
+|---------------|-----------------------------------------------------------------------------------------|---------|---------|
+| `url`         | Relative path or absolute URL pointing to the directory tree to fetch                   | `string`|         |
+| `cuePkg`      | Cue package name, default is "config"                                                  | `string`|         |
+| `cueCmd`      | Cue command name, default is "run"                                                     | `string`|         |
+| `cueOutDir`   | Cue output dir, default is "out"                                                       | `string`|         |
+| `values`      | Values to pass on to the templating engine                                              | `object`|         |
+| `targetPath`  | Target path within the working directory to generate contents to. Defaults to the working directory root. | `string`|         |
 
 #### Examples
 
 #### Outputs
+| Key          | Description                                   | Type   |
+|--------------|-----------------------------------------------|--------|
+| `out`        | Output directory containing generated files   | `string`|
 
 #### Links
 https://github.com/shoukoo/backstage-plugin-scaffolder-cuelang/blob/main/src/actions/cueflow.ts
 
 ## Gerrit
+Action for creating a new Gerrit review by committing and pushing changes to a Git repository.
 
 ### `publish:gerrit:review`
 #### Inputs
 
+| Key                   | Description                                                             | Type                  | Example |
+|-----------------------|-------------------------------------------------------------------------|-----------------------|---------|
+| `repoUrl`             | Repository Location                                                     | `string`              |         |
+| `branch`              | Branch of the repository the review will be created on                 | `string`              |         |
+| `sourcePath`          | Subdirectory of working directory containing the repository              | `string`              |         |
+| `gitCommitMessage`    | Sets the commit message on the repository.                              | `string`              |         |
+| `gitAuthorName`       | Sets the default author name for the commit. The default value is 'Scaffolder' | `string`              |         |
+| `gitAuthorEmail`      | Sets the default author email for the commit.                           | `string`              |         |
+
 #### Examples
+```yaml
+steps:
+  - id: publish
+    action: publish:gerrit:review
+    name: Publish new gerrit review
+    input:
+      repoUrl: gerrithost.org?repo=repo&owner=owner
+      gitCommitMessage: Initial Commit Message
+      branch: develop
+```
+
+### Description
+This publishes a new Gerrit review, specifying the repository URL, commit message, and branch to use.
 
 #### Outputs
+
+| Key                    | Description                                     | Type     |
+|------------------------|-------------------------------------------------|----------|
+| `reviewUrl`            | A URL to the review                            | `string` |
+| `repoContentsUrl`      | A URL to the root of the repository           | `string` |
 
 #### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gerrit/src/actions/gerritReview.ts
 
 ### `publish:gerrit`
+Action that initializes a Git repository with content from the workspace and publishes it to a Gerrit instance.
+
 #### Inputs
+| Key                 | Description                                                                      | Type        | Example |
+|---------------------|----------------------------------------------------------------------------------|-------------|---------|
+| `repoUrl`           | Repository Location                                                              | `string`    |         |
+| `description`       | Repository Description                                                            | `string`    |         |
+| `defaultBranch`     | Sets the default branch on the repository. The default value is 'master'        | `string`    |         |
+| `gitCommitMessage`  | Sets the commit message on the repository. The default value is 'initial commit'| `string`    |         |
+| `gitAuthorName`     | Sets the default author name for the commit. The default value is 'Scaffolder'  | `string`    |         |
+| `gitAuthorEmail`    | Sets the default author email for the commit.                                   | `string`    |         |
+| `sourcePath`        | Path within the workspace that will be used as the repository root.            | `string`    |         |
 
 #### Examples
 
+```yaml
+steps:
+  - id: publish
+    action: publish:gerrit
+    name: Publish to Gerrit
+    input:
+      repoUrl: 'gerrit.com?repo=repo&owner=owner'
+      description: 'Initialize a gerrit repository'
+```
+This publishes content to a Gerrit repository.
+
 #### Outputs
+| Key                 | Description                                                             | Type        |
+|---------------------|-------------------------------------------------------------------------|-------------|
+| `remoteUrl`         | A URL to the repository with the provider                               | `string`    |
+| `repoContentsUrl`   | A URL to the root of the repository                                      | `string`    |
+| `commitHash`        | The git commit hash of the initial commit                                | `string`    |
 
 #### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gerrit/src/actions/gerrit.ts
 
 ## Gitea
+Action for Backstage that initializes a git repository from workspace content and publishes it to a Gitea instance.
 
 ### `publish:gitea`
 #### Inputs
+| Key                     | Description                                                                                               | Type     | Example |
+|------------------------|-----------------------------------------------------------------------------------------------------------|----------|---------|
+| `repoUrl`              | Repository Location                                                                                       | `string` |         |
+| `description`          | Repository Description                                                                                     | `string` |         |
+| `defaultBranch`        | Sets the default branch on the repository. The default value is 'main'                                   | `string` |         |
+| `repoVisibility`       | Sets the visibility of the repository. The default value is 'public'.                                    | `string` |         |
+| `gitCommitMessage`     | Sets the commit message on the repository. The default value is 'initial commit'                         | `string` |         |
+| `gitAuthorName`        | Sets the default author name for the commit. The default value is 'Scaffolder'                          | `string` |         |
+| `gitAuthorEmail`       | Sets the default author email for the commit.                                                            | `string` |         |
+| `sourcePath`           | Path within the workspace that will be used as the repository root. If omitted, the entire workspace will be published as the repository. | `string` |         |
 
 #### Examples
 
+```yaml
+steps:
+  - id: publish
+    action: publish:gitea
+    name: Publish to Gitea
+    input:
+      repoUrl: 'gitea.com?repo=repo&owner=owner'
+      defaultBranch: 'main'
+      repoVisibility: 'private'
+```
+This publishes a repository to Gitea.
 #### Outputs
+| Key                     | Description                                                                                               | Type     |
+|------------------------|-----------------------------------------------------------------------------------------------------------|----------|
+| `remoteUrl`            | A URL to the repository with the provider                                                                 | `string` |
+| `repoContentsUrl`      | A URL to the root of the repository                                                                       | `string` |
+| `commitHash`           | The git commit hash of the initial commit                                                                 | `string` |
 
 #### Links
 https://www.npmjs.com/package/@backstage/plugin-scaffolder-backend-module-gitea
+https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gitea/src/actions/gitea.ts
 
 ## GitHub
 
 ### `publish:github`
+This action creates a new GitHub repository and publishes the files in the workspace directory to the repository.
+
 #### Inputs
 
-#### Examples
-
-#### Outputs
-
-#### Links
-
-This action creates a new GitHub repository and publishes the files in the workspace directory to the repository. There is one mandatory parameter `repoUrl`. The repo url picker described in the `string` parameter description above.
-
-The `repoUrl` must be in the format `github.com?repo=<reponame>&owner=<owner org>`
+| **Key**                           | **Description**                                                                                         | **Type**                                 | **Example** |
+|------------------------------------|---------------------------------------------------------------------------------------------------------|------------------------------------------|-------------|
+| `repoUrl`                          | The URL of the repository where the content will be published.                                           | `string`                                 |             |
+| `description`                      | Optional description of the repository.                                                                 | `string`                                 |             |
+| `homepage`                         | Optional homepage URL for the repository.                                                               | `string`                                 |             |
+| `access`                           | The access level for the repository (private/public/internal).                                           | `string`                                 |             |
+| `defaultBranch`                    | The default branch for the repository (e.g., master or main).                                            | `string`                                 |             |
+| `protectDefaultBranch`             | Whether to protect the default branch.                                                                  | `boolean`                                |             |
+| `protectEnforceAdmins`             | Whether to enforce branch protection for admins.                                                        | `boolean`                                |             |
+| `deleteBranchOnMerge`              | Whether to delete the branch after merging pull requests.                                                | `boolean`                                |             |
+| `gitCommitMessage`                 | Custom commit message for the initial commit.                                                            | `string`                                 |             |
+| `gitAuthorName`                    | Author name for the initial commit.                                                                     | `string`                                 |             |
+| `gitAuthorEmail`                   | Author email for the initial commit.                                                                    | `string`                                 |             |
+| `allowRebaseMerge`                 | Whether to allow rebase merging.                                                                        | `boolean`                                |             |
+| `allowSquashMerge`                 | Whether to allow squash merging.                                                                        | `boolean`                                |             |
+| `squashMergeCommitTitle`           | Title for squash merge commits, can be either 'PR_TITLE' or 'COMMIT_OR_PR_TITLE'.                        | `'PR_TITLE' | 'COMMIT_OR_PR_TITLE'`        |             |
+| `squashMergeCommitMessage`         | Message for squash merge commits, can be 'PR_BODY', 'COMMIT_MESSAGES', or 'BLANK'.                       | `'PR_BODY' | 'COMMIT_MESSAGES' | 'BLANK'`|             |
+| `allowMergeCommit`                 | Whether to allow regular merge commits.                                                                 | `boolean`                                |             |
+| `allowAutoMerge`                   | Whether to allow auto-merging pull requests.                                                            | `boolean`                                |             |
+| `sourcePath`                       | Path to the source code to be pushed to the repository.                                                  | `string`                                 |             |
+| `bypassPullRequestAllowances`      | Users, teams, or apps that can bypass pull request requirements.                                         | `object`                                 |             |
+| `requiredApprovingReviewCount`     | Number of required approving reviews for pull requests.                                                  | `number`                                 |             |
+| `restrictions`                     | Restrictions on which users, teams, or apps can push to the branch.                                      | `object`                                 |             |
+| `requireCodeOwnerReviews`          | Whether to require code owner reviews for pull requests.                                                 | `boolean`                                |             |
+| `dismissStaleReviews`              | Whether to dismiss stale reviews when new commits are pushed.                                            | `boolean`                                |             |
+| `requiredStatusCheckContexts`      | Status checks required to pass before merging.                                                           | `string[]`                               |             |
+| `requireBranchesToBeUpToDate`      | Whether branches must be up to date with the base branch before merging.                                 | `boolean`                                |             |
+| `requiredConversationResolution`   | Whether to require conversation resolution before merging.                                               | `boolean`                                |             |
+| `requireLastPushApproval`          | Whether to require approval of the last push in a pull request.                                          | `boolean`                                |             |
+| `repoVisibility`                   | The visibility of the repository (private, internal, or public).                                         | `'private' | 'internal' | 'public'`     |             |
+| `collaborators`                    | List of users or teams with specific access to the repository.                                           | `Array<object>`                          |             |
+| `hasProjects`                      | Whether to enable GitHub Projects for the repository.                                                    | `boolean`                                |             |
+| `hasWiki`                          | Whether to enable GitHub Wiki for the repository.                                                        | `boolean`                                |             |
+| `hasIssues`                        | Whether to enable GitHub Issues for the repository.                                                      | `boolean`                                |             |
+| `token`                            | GitHub access token for authentication.                                                                 | `string`                                 |             |
+| `topics`                           | List of topics to apply to the repository.                                                               | `string[]`                               |             |
+| `repoVariables`                    | Custom variables to set for the repository.                                                              | `object`                                 |             |
+| `secrets`                          | Secret values to store in the repository.                                                                | `object`                                 |             |
+| `oidcCustomization`                | Customization for OIDC tokens used in the repository.                                                    | `object`                                 |             |
+| `requiredCommitSigning`            | Whether to require commit signing.                                                                       | `boolean`                                |             |
+| `customProperties`                 | Additional custom properties for repository creation.                                                    | `object`                                 |             |
 
 #### Examples
 ```yaml
@@ -3653,37 +4026,43 @@ steps:
         - ruby
 ```
 
-#### Outputs
-
-The `publish:github` action produces two step outputs.
-
-| Name            | Description                                   |
-| --------------- | --------------------------------------------- |
-| remoteUrl       | Url for the newly created repository          |
-| repoContentsUrl | Url that shows the contents of the repository |
-
-These outputs can be retrieved by a subsequent step using:
-
-```yaml
-steps:
-  - id: log-message
-    name: Log Message
-    action: debug:log
-    input:
-      message: 'RemoteURL: ${{ steps["publish-repository"].output.remoteUrl }}, ${{ steps["publish-repository"].output.repoContentsUrl }}!'
-```
-
-### `publish:github:pull-request`
-#### Inputs
-
-#### Examples
 
 #### Outputs
+| **Key**           | **Description**                                           | **Type**     |
+|-------------------|-----------------------------------------------------------|--------------|
+| `remoteUrl`       | The remote URL of the repository where the content is published. | `string`     |
+| `repoContentsUrl` | The URL to view the contents of the repository.            | `string`     |
+| `commitHash`      | The hash of the initial commit pushed to the repository.   | `string`     |
+
 
 #### Links
-https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-github/src/actions/githubPullRequest.ts
+https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-github/src/actions/github.ts
 
+
+
+### `publish:github:pull-request`
 This action creates a pull request against a pre-existing repository using the files contained in the workspace directory. 
+#### Inputs
+
+| Key                   | Description                                                                                                   | Type    | Example |
+|-----------------------|---------------------------------------------------------------------------------------------------------------|---------|---------|
+| `repoUrl`             | Accepts the format 'github.com?repo=reponame&owner=owner' where 'reponame' is the repository name and 'owner' is an organization or username. | `string`|         |
+| `branchName`          | The name for the branch.                                                                                     | `string`|         |
+| `targetBranchName`    | The target branch name of the merge request.                                                                 | `string`|         |
+| `title`               | The name for the pull request.                                                                                | `string`|         |
+| `description`         | The description of the pull request.                                                                         | `string`|         |
+| `draft`               | Create a draft pull request.                                                                                 | `boolean`|        |
+| `sourcePath`          | Subdirectory of the working directory to copy changes from.                                                  | `string`|         |
+| `targetPath`          | Subdirectory of the repository to apply changes to.                                                          | `string`|         |
+| `token`               | The token to use for authorization to GitHub.                                                                | `string`|         |
+| `reviewers`           | The users that will be added as reviewers to the pull request.                                               | `array` |         |
+| `teamReviewers`       | The teams that will be added as reviewers to the pull request.                                               | `array` |         |
+| `commitMessage`       | The commit message for the pull request commit.                                                              | `string`|         |
+| `update`              | Update pull request if it already exists.                                                                    | `boolean`|        |
+| `forceFork`           | Create pull request from a fork.                                                                              | `boolean`|        |
+| `gitAuthorName`       | Sets the default author name for the commit. The default value is the authenticated user or 'Scaffolder'.    | `string`|         |
+| `gitAuthorEmail`      | Sets the default author email for the commit. The default value is the authenticated user or 'scaffolder@backstage.io'. | `string`|         |
+| `forceEmptyGitAuthor` | Forces the author to be empty. This is useful when using a Github App, allowing the commit to be verified on Github. | `boolean`|        |
 
 #### Examples
 The most basic example is:
@@ -3772,8 +4151,11 @@ steps:
     input:
       message: 'RemoteURL: ${{ steps["create-pull-request.output.remoteUrl }}, ${{ steps["create-pull-request"].output.pullRequestNumber }}!'
 ```
+
+#### Links
+https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-github/src/actions/githubPullRequest.ts
+
 ### `github:actions:dispatch`
-[//]: # (TODO:)
 
 The `github:actions:dispatch` action allows you to trigger the execution of a GitHub action on a repository. The `repoUrl` option is a repo url for GitHub. The `RepoUrlPicker` documented above can generate this value. The `workflowId` can be the workflow id from the GitHub API or you can just use the filename for the workflow file itself. The `branchOrTagName` indicates which commit to run the workflow against.
 
@@ -3811,8 +4193,10 @@ steps:
 
 The `github:actions:dispatch` action does not have any outputs.
 
+#### Link
+
+
 ### `github:webhook`
-[//]: # (TODO:)
 
 You can configure a webhook on an existing repository in GitHub using this action. It takes `repoUrl` and `webhookUrl`. The `repoUrl` option needs to be in a GitHub repo format. The `RepoUrlPicker` documented above will generate a URL in the correct format.
 
@@ -3900,44 +4284,324 @@ steps:
 The `github:webhook` action does not have any outputs.
 
 ### `github:autolinks:create`
-[//]: # (TODO:)
+Action to create autolink references for GitHub repositories, which automatically link certain keywords to specific URLs in issues, pull requests, or commits.
+#### Inputs
+| Key          | Description                                                                                                                                                                       | Type              | Example |
+|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------|--------|
+| `repoUrl`    | Accepts the format 'github.com?repo=reponame&owner=owner' where 'reponame' is the new repository name and 'owner' is an organization or username.                             | `string`          |        |
+| `keyPrefix`  | This prefix appended by certain characters will generate a link any time it is found in an issue, pull request, or commit.                                                      | `string`          |        |
+| `urlTemplate`| The URL must contain `<num>` for the reference number. `<num>` matches different characters depending on the value of `isAlphanumeric`.                                         | `string`          |        |
+| `isAlphanumeric` | Whether this autolink reference matches alphanumeric characters. If true, the `<num>` parameter of the `urlTemplate` matches alphanumeric characters A-Z (case insensitive), 0-9, and -. If false, this autolink reference only matches numeric characters. Default: true | `boolean`         |        |
+| `token`      | The token to use for authorization to GitHub.                                                                                                                                   | `string`          |        |
+
+#### Examples
+
+```yaml
+steps:
+  - action: 'github:autolinks:create'
+    name: 'Create an autolink reference'
+    input:
+      repoUrl: 'github.com?repo=repo&owner=owner'
+      keyPrefix: 'TICKET-'
+      urlTemplate: 'https://example.com/TICKET?query=<num>'
+      isAlphanumeric: false
+```
+
+This performs the autolink creation action in a GitHub repository.
+#### Outputs
+None
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-github/src/actions/githubAutolinks.ts
 
 ### `github:deployKey:create`
-[//]: # (TODO:)
+Action for Backstage that creates and stores GitHub Deploy Keys, including the ability to encrypt and store the associated private key as a GitHub secret.
+
+#### Inputs
+| Key                  | Description                                                                                                                                    | Type                      | Example |
+|----------------------|------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------|---------|
+| `repoUrl`            | Accepts the format 'github.com?repo=reponame&owner=owner' where 'reponame' is the new repository name and 'owner' is an organization or username | `string`                  |         |
+| `publicKey`          | Generated from ssh-keygen. Begins with 'ssh-rsa', 'ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp521', 'ssh-ed25519', 'sk-ecdsa-sha2-nistp256@openssh.com', or 'sk-ssh-ed25519@openssh.com'. | `string`                  |         |
+| `privateKey`         | SSH Private Key generated from ssh-keygen                                                                                                   | `string`                  |         |
+| `deployKeyName`      | Name of the Deploy Key                                                                                                                        | `string`                  |         |
+| `privateKeySecretName` | Name of the GitHub Secret to store the private key related to the Deploy Key. Defaults to: 'KEY_NAME_PRIVATE_KEY' where 'KEY_NAME' is the name of the Deploy Key | `string`                  |         |
+| `token`              | The token to use for authorization to GitHub                                                                                                  | `string`                  |         |
+
+
+#### Examples
+The YAML representation of the provided steps describes a process for creating and storing a GitHub Deploy Key, specifying the necessary inputs such as repository URL, public key, private key, and the deploy key name.
+
+
+```yaml
+steps:
+  - action: github:deployKey:create
+    name: Create and store a Deploy Key
+    input:
+      repoUrl: github.com?repo=repository&owner=owner
+      publicKey: pubkey
+      privateKey: privkey
+      deployKeyName: Push Tags
+```
+This is for creating and storing a GitHub Deploy Key, specifying the necessary inputs such as repository URL, public key, private key, and the deploy key name.
+
+#### Outputs
+
+| Key                      | Description                                                                      | Type                      |
+|--------------------------|----------------------------------------------------------------------------------|---------------------------|
+| `privateKeySecretName`   | The GitHub Action Repo Secret Name for the Private Key                          | `string`                  |
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-github/src/actions/githubDeployKey.ts
 
 ### `github:environment:create`
-[//]: # (TODO:)
+Action for creating deployment environments on GitHub.
+
+#### Inputs
+| Key                             | Description                                                                                                         | Type                                | Example |
+|---------------------------------|---------------------------------------------------------------------------------------------------------------------|-------------------------------------|---------|
+| `repoUrl`                       | Accepts the format 'github.com?repo=reponame&owner=owner' where 'reponame' is the new repository name and 'owner' is an organization or username | `string`                            |         |
+| `name`                          | Name of the deployment environment to create                                                                        | `string`                            |         |
+| `deploymentBranchPolicy`        | The type of deployment branch policy for this environment. To allow all branches to deploy, set to null.          | `object`                            |         |
+| `customBranchPolicyNames`       | The name pattern that branches must match in order to deploy to the environment.                                   | `array`                             |         |
+| `customTagPolicyNames`         | The name pattern that tags must match in order to deploy to the environment.                                      | `array`                             |         |
+| `environmentVariables`          | Environment variables attached to the deployment environment                                                       | `object`                            |         |
+| `secrets`                      | Secrets attached to the deployment environment                                                                     | `object`                            |         |
+| `token`                         | The token to use for authorization to GitHub                                                                        | `string`                            |         |
+| `waitTimer`                    | The time to wait before creating or updating the environment (in milliseconds)                                     | `integer`                           |         |
+| `preventSelfReview`            | Whether to prevent self-review for this environment                                                                  | `boolean`                           |         |
+| `reviewers`                    | Reviewers for this environment                                                                                      | `array`                             |         |
+
+
+#### Examples
+
+#### Outputs
+None
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-github/src/actions/githubEnvironment.ts
 
 ### `github:issues:label`
-[//]: # (TODO:)
+Action to add labels to pull requests or issues on GitHub.
+
+#### Inputs
+| **Key**      | **Description**                                                                                      | **Type**       | **Example** |
+|--------------|------------------------------------------------------------------------------------------------------|----------------|-------------|
+| `repoUrl`    | Accepts the format `'github.com?repo=reponame&owner=owner'` where 'reponame' is the repository name and 'owner' is an organization or username | `string`       |             |
+| `number`     | The pull request or issue number to add labels to                                                     | `number`       |             |
+| `labels`     | The labels to add to the pull request or issue                                                        | `string[]`     |             |
+| `token`      | The GitHub token to use for authorization                                                             | `string`       |             |
+
+#### Examples
+```yaml
+steps:
+  - action: 'github:issues:label'
+    name: 'Add labels to pull request or issue with token'
+    input:
+      repoUrl: 'github.com?repo=repo&owner=owner'
+      number: '1'
+      labels: 
+        - 'bug'
+        - 'documentation'
+      token: 'gph_YourGitHubToken'
+```
+
+### YAML Description
+This action adds the labels "bug" and "documentation" to issue or pull request #1 in a GitHub repository, using a provided GitHub token for authentication.
+#### Outputs
+None
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-github/src/actions/githubIssuesLabel.ts
 
 ### `github:pages:enable`
-[//]: # (TODO:)
+Action for enabling GitHub Pages for a specified repository, with various customization options such as the build type, source branch, and source path.
+
+#### Inputs
+
+| **Key**          | **Description**                                                                                      | **Type**     | **Example** |
+|------------------|------------------------------------------------------------------------------------------------------|--------------|-------------|
+| `repoUrl`        | Accepts the format 'github.com?repo=reponame&owner=owner' where 'reponame' is the repository name and 'owner' is an organization or username | `string`     |             |
+| `buildType`      | The GitHub Pages build type - "legacy" or "workflow". Default is "workflow"                           | `string`     |             |
+| `sourceBranch`   | The GitHub Pages source branch. Default is "main"                                                     | `string`     |             |
+| `sourcePath`     | The GitHub Pages source path - "/" or "/docs". Default is "/"                                         | `string`     |             |
+| `token`          | The token to use for authorization to GitHub                                                          | `string`     |             |
+
+#### Examples
+```yaml
+steps:
+  - action: 'github:pages:enable'
+    id: 'github-pages-custom-path'
+    name: 'Enable GitHub Pages with Custom Source Path'
+    input:
+      repoUrl: 'github.com?repo=customPathRepo&owner=customOwner'
+      sourcePath: '/docs'
+      token: 'gph_YourGitHubToken'
+```
+
+This YAML specifies a step that enables GitHub Pages for the repository `customPathRepo` owned by `customOwner`, using the source path `/docs` and an authorization token.
+#### Outputs
+None
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-github/src/actions/githubPagesEnable.ts
 
 ### `github:repo:create`
-[//]: # (TODO:)
+The code defines a Backstage action for creating GitHub repositories programmatically, allowing customization of repository settings, collaborators, and configurations.
+
+#### Inputs
+
+| **Key** | **Description** | **Type** | **Example** |
+| --- | --- | --- | --- |
+| `repoUrl` | The URL of the repository | `string` | |
+| `description` | Description of the repository | `string` | |
+| `homepage` | The homepage URL for the repository | `string` | |
+| `access` | Access level for the repository | `string` | |
+| `deleteBranchOnMerge` | Whether to delete branch after merging | `boolean` | |
+| `gitAuthorName` | Name of the git author | `string` | |
+| `gitAuthorEmail` | Email of the git author | `string` | |
+| `allowRebaseMerge` | Allow rebase merging | `boolean` | |
+| `allowSquashMerge` | Allow squash merging | `boolean` | |
+| `squashMergeCommitTitle` | Title for squash merge commits | `'PR_TITLE' \| 'COMMIT_OR_PR_TITLE'` | |
+| `squashMergeCommitMessage` | Message for squash merge commits | `'PR_BODY' \| 'COMMIT_MESSAGES' \| 'BLANK'` | |
+| `allowMergeCommit` | Allow merge commits | `boolean` | |
+| `allowAutoMerge` | Enable automatic merging | `boolean` | |
+| `requireCodeOwnerReviews` | Require code owner reviews | `boolean` | |
+| `bypassPullRequestAllowances` | Bypass pull request restrictions | `object` | |
+| `requiredApprovingReviewCount` | Number of required reviews for approval | `number` | |
+| `restrictions` | Restrictions on who can push to branches | `object` | |
+| `requiredStatusCheckContexts` | Required status checks before merging | `string[]` | |
+| `requireBranchesToBeUpToDate` | Require branches to be up to date | `boolean` | |
+| `requiredConversationResolution` | Require conversations to be resolved before merging | `boolean` | |
+| `repoVisibility` | Visibility of the repository | `'private' \| 'internal' \| 'public'` | |
+| `collaborators` | List of collaborators for the repository | `Array<object>` | |
+| `hasProjects` | Whether the repository has GitHub Projects enabled | `boolean` | |
+| `hasWiki` | Whether the repository has a Wiki | `boolean` | |
+| `hasIssues` | Whether the repository has Issues enabled | `boolean` | |
+| `token` | Access token for GitHub authentication | `string` | |
+| `topics` | List of topics for the repository | `string[]` | |
+| `repoVariables` | Repository-level environment variables | `object` | |
+| `secrets` | Secrets to store in the repository | `object` | |
+| `oidcCustomization` | OIDC customization settings | `object` | |
+| `requireCommitSigning` | Require commit signing | `boolean` | |
+| `customProperties` | Custom properties for the repository | `object` | |
+
+#### Examples
+```yaml
+steps:
+  - action: 'github:repo:create'
+    name: 'Create a new GitHub repository with a description'
+    input:
+      repoUrl: 'github.com?repo=repo&owner=owner'
+      description: 'My new repository'
+```
+Creates a new GitHub repository with a specified URL and description.
+
+
+#### Outputs
+
+| **Key** | **Description** | **Type** |
+| --- | --- | --- |
+| `remoteUrl` | The remote URL of the newly created GitHub repository | `string` |
+| `repoContentsUrl` | URL to the repository contents | `string` |
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-github/src/actions/githubRepoCreate.ts
 
 ### `github:repo:push`
-[//]: # (TODO:)
+Action that initializes a git repository in a workspace and pushes it to GitHub, with options to configure branch protection, commit rules, and other repository settings.
+
+#### Inputs
+
+| **Key**                        | **Description**                                                                                | **Type**                    | **Example** |
+|---------------------------------|-----------------------------------------------------------------------------------------------|-----------------------------|-------------|
+| `repoUrl`                       | Repository URL (GitHub repository in the format: `owner/repo`)                                | `string`                    |             |
+| `requireCodeOwnerReviews`       | Whether to require code owner reviews for pull requests                                       | `boolean`                   |             |
+| `dismissStaleReviews`           | Whether to dismiss stale reviews when new commits are pushed                                  | `boolean`                   |             |
+| `requiredStatusCheckContexts`   | The list of status checks that must pass before a merge                                       | `string[]`                  |             |
+| `bypassPullRequestAllowances`   | Allows bypassing pull request requirements for specified users, teams, or apps                | `object`                    |             |
+| `requiredApprovingReviewCount`  | The number of approving reviews required for pull requests                                    | `number`                    |             |
+| `restrictions`                  | Restricts who can push to the protected branch (users, teams, and apps)                       | `object`                    |             |
+| `requireBranchesToBeUpToDate`   | Whether branches need to be up to date before merging                                         | `boolean`                   |             |
+| `requiredConversationResolution`| Whether to require conversation resolution before merging                                    | `boolean`                   |             |
+| `requireLastPushApproval`       | Whether the last push must be approved before merging                                         | `boolean`                   |             |
+| `defaultBranch`                 | The default branch name for the repository                                                    | `string`                    |             |
+| `protectDefaultBranch`          | Whether to protect the default branch from being force-pushed                                 | `boolean`                   |             |
+| `protectEnforceAdmins`          | Whether to enforce protections for admin users                                                | `boolean`                   |             |
+| `gitCommitMessage`              | The commit message for the initial commit                                                     | `string`                    |             |
+| `gitAuthorName`                 | The name of the author for the git commit                                                     | `string`                    |             |
+| `gitAuthorEmail`                | The email of the author for the git commit                                                    | `string`                    |             |
+| `sourcePath`                    | The path to the content to push to the repository                                             | `string`                    |             |
+| `token`                         | The token for GitHub authentication (if not provided via integration)                        | `string`                    |             |
+| `requiredCommitSigning`         | Whether commit signing is required                                                           | `boolean`                   |             |
+
+
+#### Examples
+
+```yaml
+steps:
+  - action: github:repo:push
+    name: Create test repo with testuser as owner.
+    input:
+      repoUrl: github.com?repo=test&owner=testuser
+```
+This create a test repository with a specified owner.
+#### Outputs
+
+| **Key**              | **Description**                                      | **Type**   |
+|----------------------|------------------------------------------------------|------------|
+| `remoteUrl`          | The clone URL of the repository                      | `string`   |
+| `repoContentsUrl`    | URL to the repository contents (e.g., on the default branch) | `string`   |
+| `commitHash`         | The hash of the commit made                          | `string`   |
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-github/src/actions/githubRepoPush.ts
 
 ### `parse:repo-url:plus`
-[//]: # (TODO:)
-https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-plus/blob/HEAD/exemples.md#parserepo-urlplus
+Action that parses repository URLs and extracts relevant metadata based on a specified schema.
+#### Inputs
 
+| Key        | Description                            | Type    | Example |
+|------------|----------------------------------------|---------|---------|
+| reposUrls  | An array of repository URLs to parse   | `array` |         |
+
+#### Examples
+Parse Repo Url like "host?owner=any&organization=any&workspace=any&project=any"
+```yaml
+steps:
+  - action: parse:repo-url:plus
+    id: parse-repos-url
+    name: Parse Repos URLs
+    input:
+      reposUrls:
+        - host?owner=any&organization=any&workspace=any&project=any
+```
+#### Outputs
+
+| Key          | Description                                  | Type     |
+|--------------|----------------------------------------------|----------|
+| results      | An array of objects containing parsed repo specifications | `array`  |
+| results.repo | The name of the repository                   | `string` |
+| results.host | The host of the repository                   | `string` |
+| results.owner | The owner of the repository                 | `string` |
+| results.organization | The organization associated with the repository | `string` |
+| results.workspace | The workspace associated with the repository | `string` |
+| results.project | The project associated with the repository | `string` |
+
+#### Links
+
+https://github.com/kode3tech/k3t-backstage-plugin-scaffolder-backend-module-plus/blob/29e02a71d9488efa726d805a86d25c15dd5b6a37/src/actions/builtin/extras/parse-repo-url.ts
 ## Gitlab
 
 ### `publish:gitlab`
 
 Initializes a git repository of the content in the workspace, and publishes it to GitLab. See input options [in the application](/docs/scaffolder/writing-templates/#actions)
 
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 
 #### Examples
 ```yaml
@@ -3950,7 +4614,13 @@ steps:
 ```
 
 ### `publish:gitlab:merge-request`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 Create a merge request in GitLab. See input options [in the application](/docs/scaffolder/writing-templates/#actions)
 
 #### Examples
@@ -3969,149 +4639,335 @@ steps:
 ```
 
 ### `gitlab:repo:push`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gitlab/src/actions/gitlabRepoPush.ts
 
 ### `gitlab:group:ensureExists`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gitlab/src/actions/gitlabGroupEnsureExists.ts
 
 ### `gitlab:issues:create`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gitlab/src/actions/gitlabIssueCreate.ts
 
 ### `gitlab:issue:edit`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gitlab/src/actions/gitlabIssueEdit.ts
 
 ### `gitlab:pipeline:trigger`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gitlab/src/actions/gitlabPipelineTrigger.ts
 
 ### `gitlab:projectAccessToken:create`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gitlab/src/actions/gitlabProjectAccessTokenCreate.ts
 
 ### `gitlab:projectVariable:create`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gitlab/src/actions/gitlabProjectVariableCreate.ts
 
 ### `gitlab:projectDeployToken:create`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gitlab/src/actions/gitlabProjectDeployTokenCreate.ts
 
 ## Humanitec
 
 ### `humanitec:create-app`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@humanitec/backstage-plugin-scaffolder-backend-module
 
 ## Microsoft Teams
 
 ### `ms-teams:sendMessage`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@grvpandey11/backstage-plugin-scaffolder-backend-module-ms-teams
 
 ## NPM
 
 ### `npm:init`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/arhill05/backstage-plugin-scaffolder-npm-actions
 
 ### `npm:install`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/arhill05/backstage-plugin-scaffolder-npm-actions
 
 ### `npm:exec`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/arhill05/backstage-plugin-scaffolder-npm-actions
 
 ### `npm:config`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/arhill05/backstage-plugin-scaffolder-npm-actions
 
 ## Odo
 
 ### `devfile:odo:command`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@backstage-community/plugin-scaffolder-backend-module-odo
 
 ### `devfile:odo:component:init`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@backstage-community/plugin-scaffolder-backend-module-odo
 
 ## Pagerduty
 
 ### `pagerduty:service:create`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/PagerDuty/backstage-plugin-scaffolder-actions/blob/main/src/actions/custom.ts
 https://www.npmjs.com/package/@pagerduty/backstage-plugin-scaffolder-actions
 
 ## Quay
 
 ### quay:create-repository
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-quay
 
 ## Sonarqube
 
 ### `sonarqube:create-project`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-sonarqube
 
 ## ServiceNow
 
 ### `servicenow:now:table:createRecord`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-servicenow
 ### `servicenow:now:table:deleteRecord`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-servicenow
 ### `servicenow:now:table:modifyRecord`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-servicenow
 ### `servicenow:now:table:retrieveRecord`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-servicenow
 ### `servicenow:now:table:retrieveRecords`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-servicenow
 ### `servicenow:now:table:updateRecord`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-servicenow
 
 ## Slack
 
 ### `slack:sendMessage:conversation`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/arhill05/backstage-plugin-scaffolder-backend-module-slack/blob/main/src/actions/slack/send-slack-message-via-slack-api.ts
 
 ### `slack:sendMessage:webhook`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@mdude2314/backstage-plugin-scaffolder-backend-module-slack
 
 ## Sentry
 
 ### `sentry:create-project`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/backstage/backstage/tree/master/plugins/scaffolder-backend-module-sentry
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-sentry/src/actions/createProject.ts
 
 ## Torque
 
 ### `torque:create-app`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@qtorque/backstage-plugin-torque-backend
 
 ## Webex
 
 ### `webex:webhooks:sendMessage`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://www.npmjs.com/package/@coderrob/backstage-plugin-scaffolder-backend-module-webex
 
 ## Yeoman
 
 ### `run:yeoman`
-[//]: # (TODO:)
+#### Inputs
+
+#### Examples
+
+#### Outputs
+
+#### Links
 https://github.com/backstage/backstage/tree/master/plugins/scaffolder-backend-module-yeoman
 
