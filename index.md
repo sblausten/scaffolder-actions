@@ -4597,31 +4597,83 @@ Initializes a git repository of the content in the workspace, and publishes it t
 
 #### Inputs
 
-#### Examples
-
-#### Outputs
-
-#### Links
+| **Key**                | **Description**                                                                                                                | **Type**        | **Example** |
+|------------------------|--------------------------------------------------------------------------------------------------------------------------------|-----------------|-------------|
+| `repoUrl`              | Accepts the format `'gitlab.com?repo=project_name&owner=group_name'` where 'project_name' is the repository name and 'group_name' is a group or username | `string`        |             |
+| `repoVisibility`        | Sets the visibility of the repository. The default value is `'private'`. (deprecated, use settings.visibility instead)          | `string`        |             |
+| `defaultBranch`         | Sets the default branch on the repository. The default value is `'master'`.                                                    | `string`        |             |
+| `gitCommitMessage`      | Sets the commit message on the repository. The default value is `'initial commit'`.                                             | `string`        |             |
+| `gitAuthorName`         | Sets the default author name for the commit. The default value is `'Scaffolder'`.                                               | `string`        |             |
+| `gitAuthorEmail`        | Sets the default author email for the commit.                                                                                   | `string`        |             |
+| `sourcePath`            | Path within the workspace that will be used as the repository root. If omitted, the entire workspace will be published.         | `string`        |             |
+| `token`                 | The token to use for authorization to GitLab.                                                                                   | `string`        |             |
+| `setUserAsOwner`        | Set the token user as owner of the newly created repository.                                                                    | `boolean`       |             |
+| `topics`                | Topic labels to apply on the repository. (deprecated, use settings.topics instead)                                              | `array<string>` |             |
+| `settings.path`         | Repository name for new project. Generated based on name if not provided (generated as lowercase with dashes).                  | `string`        |             |
+| `settings.auto_devops_enabled` | Enable Auto DevOps for this project.                                                                                    | `boolean`       |             |
+| `settings.ci_config_path`      | Custom CI config path for this project.                                                                                 | `string`        |             |
+| `settings.description`        | Short project description.                                                                                               | `string`        |             |
+| `settings.merge_method`       | Merge Methods (merge, rebase_merge, ff).                                                                                 | `string`        |             |
+| `settings.squash_option`      | Set squash option for the project (never, always, default_on, default_off).                                               | `string`        |             |
+| `settings.topics`             | Topic labels to apply on the repository.                                                                                  | `array<string>` |             |
+| `settings.visibility`         | The visibility of the project. Can be private, internal, or public. The default value is private.                         | `string`        |             |
+| `branches.name`         | Branch name.                                                                                                                   | `string`        |             |
+| `branches.protect`      | Will mark branch as protected. The default value is `'false'`.                                                                 | `boolean`       |             |
+| `branches.create`       | If branch does not exist, it will be created from the provided ref. The default value is `'false'`.                             | `boolean`       |             |
+| `branches.ref`          | Branch reference to create branch from. The default value is `'master'`.                                                        | `string`        |             |
+| `projectVariables.key`  | The key of a variable; must have no more than 255 characters; only A-Z, a-z, 0-9, and _ are allowed.                            | `string`        |             |
+| `projectVariables.value` | The value of a variable.                                                                                                       | `string`        |             |
+| `projectVariables.description` | The description of the variable. The default value is `null`.                                                            | `string`        |             |
+| `projectVariables.variable_type` | The type of a variable. The default value is `'env_var'`.                                                              | `string`        |             |
+| `projectVariables.protected` | Whether the variable is protected. The default value is `'false'`.                                                         | `boolean`       |             |
+| `projectVariables.raw`   | Whether the variable is in raw format. The default value is `'false'`.                                                         | `boolean`       |             |
+| `projectVariables.environment_scope` | The environment scope of the variable. The default value is `' * '`.                                               | `string`        |             |
 
 #### Examples
 ```yaml
-steps:
-  - id: publish
-    action: publish:gitlab
-    name: Publish to GitLab
-    input:
-      repoUrl: gitlab.com?repo=project_name&owner=group_name
+ - id: publish
+      name: Publish
+      action: publish:gitlab
+      input:
+        description: This is ${{ parameters.name }}
+        repoUrl: ${{ parameters.repoUrl }}?owner=${{ steps.createGitlabGroup.output.groupId }}
+        sourcePath: pimcore
+        defaultBranch: main
 ```
-
-### `publish:gitlab:merge-request`
-#### Inputs
-
-#### Examples
 
 #### Outputs
 
+| **Key**          | **Description**                                     | **Type**  |
+|------------------|-----------------------------------------------------|-----------|
+| `remoteUrl`      | A URL to the repository with the provider.           | `string`  |
+| `repoContentsUrl`| A URL to the root of the repository.                 | `string`  |
+| `projectId`      | The ID of the project.                               | `string`  |
+| `commitHash`     | The git commit hash of the initial commit.           | `string`  |
+
+
 #### Links
-Create a merge request in GitLab. See input options [in the application](/docs/scaffolder/writing-templates/#actions)
+https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gitlab/src/actions/gitlab.ts
+
+### `publish:gitlab:merge-request`
+Action for creating a GitLab merge request.
+
+
+| **Key**              | **Description**                                                                                                        | **Type**      | **Example** |
+|----------------------|------------------------------------------------------------------------------------------------------------------------|---------------|-------------|
+| `repoUrl`            | Repository Location in the format `'gitlab.com?repo=project_name&owner=group_name'`                                     | `string`      |             |
+| `projectid`          | Project ID/Name(slug) of the GitLab project (deprecated)                                                               | `string`      |             |
+| `title`              | The name for the merge request                                                                                         | `string`      |             |
+| `description`        | The description of the merge request                                                                                   | `string`      |             |
+| `branchName`         | Source branch name of the merge request                                                                                 | `string`      |             |
+| `targetBranchName`   | Target branch name of the merge request                                                                                 | `string`      |             |
+| `sourcePath`         | Subdirectory of the working directory to copy changes from                                                              | `string`      |             |
+| `targetPath`         | Subdirectory of the repository to apply changes to                                                                      | `string`      |             |
+| `token`              | Authentication token for authorization to GitLab                                                                        | `string`      |             |
+| `commitAction`       | Action for the git commit: `create`, `update`, `delete`, or `auto` (automatic commit action based on file existence)     | `string`      |             |
+| `removeSourceBranch` | Option to delete the source branch after the merge request is merged (default: `false`)                                  | `boolean`     |             |
+| `assignee`           | User to whom the merge request will be assigned                                                                         | `string`      |             |
+
+#### Inputs
 
 #### Examples
 ```yaml
@@ -4638,82 +4690,354 @@ steps:
       assignee: my-assignee
 ```
 
+#### Outputs
+| **Key**            | **Description**                                  | **Type**      |
+|--------------------|--------------------------------------------------|---------------|
+| `targetBranchName` | Target branch name of the merge request           | `string`      |
+| `projectid`        | GitLab Project ID/Name(slug)                      | `string`      |
+| `projectPath`      | GitLab Project path                               | `string`      |
+| `mergeRequestUrl`  | URL link to the merge request in GitLab           | `string`      |
+
+#### Links
+https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gitlab/src/actions/gitlabMergeRequest.ts
+
 ### `gitlab:repo:push`
+Action that automates the process of pushing commits to a GitLab repository.
+
 #### Inputs
+| **Key**           | **Description**                                                                                         | **Type**        | **Example** |
+|-------------------|---------------------------------------------------------------------------------------------------------|-----------------|-------------|
+| `repoUrl`         | The GitLab repository location in the format `'gitlab.com?repo=project_name&owner=group_name'`.          | `string`        |             |
+| `branchName`      | The name of the branch where the commit will be applied.                                                 | `string`        |             |
+| `commitMessage`   | The message to use for the commit.                                                                       | `string`        |             |
+| `sourcePath`      | Subdirectory of the working directory to copy changes from.                                              | `string`        |             |
+| `targetPath`      | Subdirectory of the repository to apply changes to.                                                      | `string`        |             |
+| `token`           | The authentication token used for GitLab authorization.                                                  | `string`        |             |
+| `commitAction`    | The action to use for the commit (`create`, `update`, or `delete`). Defaults to `create`.                | `string` (enum) |             |
 
 #### Examples
+```yaml
+steps:
+  - id: pushChanges
+    action: gitlab:repo:push
+    name: Push changes to gitlab repository
+    input:
+      repoUrl: gitlab.com?repo=repo&owner=owner
+      commitMessage: Initial Commit
+      branchName: feature-branch
+      commitAction: update
+```
+
+This YAML defines a step that updates a specific branch in a GitLab repository with an initial commit using the `gitlab:repo:push` action.
 
 #### Outputs
+
+| **Key**         | **Description**                            | **Type**   |
+|-----------------|--------------------------------------------|------------|
+| `projectid`     | The GitLab project ID or name (slug).       | `string`   |
+| `projectPath`   | The GitLab project path.                    | `string`   |
+| `commitHash`    | The commit hash of the latest commit.       | `string`   |
 
 #### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gitlab/src/actions/gitlabRepoPush.ts
 
 ### `gitlab:group:ensureExists`
+For ensuring that a GitLab group or sub-groups exist, creating them if they do not.
+
 #### Inputs
+| **Key**         | **Description**                                      | **Type**                          | **Example** |
+|-----------------|------------------------------------------------------|-----------------------------------|-------------|
+| `host`          | The GitLab host URL                                  | `string`                          |             |
+| `repoUrl`       | The repository URL to use                            | `string`                          |             |
+| `token`         | The token to authenticate with GitLab                | `string`                          |             |
+| `path`          | A path of group names that are ensured to exist       | `string[]` (array of strings)     |             |
 
 #### Examples
+```yaml
+    - id: createGitlabGroup
+      name: Ensure Gitlab group exists
+      action: gitlab:group:ensureExists
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        path:
+          - path
+          - to
+          - group
+```
 
 #### Outputs
+
+| **Key**   | **Description**                      | **Type**    |
+|-----------|--------------------------------------|-------------|
+| `groupId` | The id of the innermost sub-group    | `number?`   |
+
 
 #### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gitlab/src/actions/gitlabGroupEnsureExists.ts
 
 ### `gitlab:issues:create`
+Action to create GitLab issues, including the input validation using Zod, GitLab API calls, and error handling.
+
+
 #### Inputs
+| **Key**                                  | **Description**                                           | **Type**                 | **Example** |
+|------------------------------------------|-----------------------------------------------------------|--------------------------|-------------|
+| `projectId`                              | Project ID                                                | `number`                 |             |
+| `title`                                  | Title of the issue                                         | `string`                 |             |
+| `assignees`                              | IDs of the users to assign the issue to                    | `array<number>`           |             |
+| `confidential`                           | Issue confidentiality                                      | `boolean`                |             |
+| `description`                            | Issue description (max 1,048,576 characters)               | `string`                 |             |
+| `createdAt`                              | Creation date/time in format `YYYY-MM-DDTHH:mm:ssZ`        | `string`                 |             |
+| `dueDate`                                | Due date/time in format `YYYY-MM-DDTHH:mm:ssZ`             | `string`                 |             |
+| `discussionToResolve`                    | ID of a discussion to resolve (with merge request option)  | `string`                 |             |
+| `epicId`                                 | ID of the linked Epic                                      | `number`                 |             |
+| `labels`                                 | Labels to apply                                            | `string`                 |             |
+| `issueType`                              | Type of the issue (based on `IssueType` enum)              | `nativeEnum<IssueType>`  |             |
+| `mergeRequestToResolveDiscussionsOf`     | IID of a merge request to resolve all issues               | `number`                 |             |
+| `milestoneId`                            | Global ID of a milestone to assign the issue               | `number`                 |             |
+| `weight`                                 | The issue weight                                           | `number`                 |             |
 
 #### Examples
+```yaml
+- id: gitlabIssue
+      name: Issues
+      action: gitlab:issues:create
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        token: ${{ secrets.USER_OAUTH_TOKEN }}
+        projectId: 1111111
+        title: Test Issue
+        assignees:
+          - 2222222
+        description: This is the description of the issue
+        confidential: true
+        createdAt: 2022-09-27 18:00:00.000
+        dueDate: 2024-09-28 12:00:00.000
+        epicId: 3333333
+        labels: phase1:label1,phase2:label2
+```
 
 #### Outputs
+| **Key**    | **Description**    | **Type**   |
+|------------|--------------------|------------|
+| `issueUrl` | URL of the created issue  | `string`   |
+| `issueId`  | ID of the created issue   | `number`   |
+| `issueIid` | IID of the created issue  | `number`   |
 
 #### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gitlab/src/actions/gitlabIssueCreate.ts
 
 ### `gitlab:issue:edit`
+This uses schemas to validate the input and output data using `zod` and interacts with GitLab's API to edit issue properties such as labels, assignees, and other metadata.
+
 #### Inputs
 
+| **Key**              | **Description**                                                                                                                                   | **Type**                               | **Example** |
+|----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------|-------------|
+| `repoUrl`            | The URL of the GitLab repository.                                                                                                                 | `string`                               |             |
+| `projectId`          | The global ID or URL-encoded path of the project owned by the authenticated user.                                                                  | `number`                               |             |
+| `issueIid`           | The internal ID of a project's issue.                                                                                                             | `number`                               |             |
+| `addLabels`          | Comma-separated label names to add to an issue. If a label does not already exist, this creates a new project label and assigns it to the issue.    | `string (optional)`                    |             |
+| `assignees`          | IDs of the users to assign the issue to.                                                                                                           | `array<number> (optional)`             |             |
+| `confidential`       | Updates an issue to be confidential.                                                                                                              | `boolean (optional)`                   |             |
+| `description`        | The description of an issue. Limited to 1,048,576 characters.                                                                                      | `string (optional)`                    |             |
+| `discussionLocked`   | Flag indicating if the issue’s discussion is locked. Only project members can add or edit comments when locked.                                    | `boolean (optional)`                   |             |
+| `dueDate`            | The due date in the format YYYY-MM-DD.                                                                                                             | `string (optional)`                    |             |
+| `epicId`             | ID of the epic to add the issue to. Valid values are greater than or equal to 0.                                                                   | `number (optional)`                    |             |
+| `issueType`          | Updates the type of issue (e.g., issue, incident, test_case, or task).                                                                             | `enum (optional)`                      |             |
+| `labels`             | Comma-separated label names for an issue. Set to an empty string to unassign all labels.                                                           | `string (optional)`                    |             |
+| `milestoneId`        | The global ID of a milestone to assign the issue to. Set to 0 or provide an empty value to unassign a milestone.                                   | `number (optional)`                    |             |
+| `removeLabels`       | Comma-separated label names to remove from an issue.                                                                                               | `string (optional)`                    |             |
+| `stateEvent`         | The state event of an issue (e.g., close, reopen).                                                                                                 | `enum (optional)`                      |             |
+| `title`              | The title of an issue.                                                                                                                             | `string (optional)`                    |             |
+| `updatedAt`          | When the issue was updated. Date-time string, ISO 8601 formatted (e.g., YYYY-MM-DDTHH:mm:ssZ or YYYY-MM-DDTHH:mm:ss.SSSZ).                         | `string (optional)`                    |             |
+| `weight`             | The issue weight. Valid values are from 0 to 10.                                                                                                   | `number (optional)`                    |             |
+| `token`              | The token used for GitLab API authentication.                                                                                                      | `string`                               |             |
+
+
 #### Examples
+```yaml
+steps:
+  - id: gitlabIssue
+    name: EditIssues
+    action: gitlab:issue:edit
+    input:
+      # commonGitlabConfigExample
+      projectId: 12
+      title: Test Issue
+      assignees:
+        - 18
+      description: This is the edited description of the issue
+      updatedAt: '2024-05-10T18:00:00.000Z'
+      dueDate: '2024-09-28'
+```
+
 
 #### Outputs
+| **Key**         | **Description**                                        | **Type**    |
+|-----------------|--------------------------------------------------------|-------------|
+| `issueUrl`      | The web URL of the issue.                              | `string`    |
+| `projectId`     | The project ID the issue belongs to.                   | `number`    |
+| `issueId`       | The unique ID of the issue.                            | `number`    |
+| `issueIid`      | The internal ID of a project's issue.                  | `number`    |
+| `state`         | The state event of the issue (e.g., open, closed).     | `string`    |
+| `title`         | The title of the issue.                                | `string`    |
+| `updatedAt`     | The last updated time of the issue (ISO 8601 format).  | `string`    |
 
 #### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gitlab/src/actions/gitlabIssueEdit.ts
 
 ### `gitlab:pipeline:trigger`
+This automates the creation and triggering of a GitLab pipeline using specific input parameters and outputs the result.
+
+
 #### Inputs
 
+| **Key**               | **Description**                                                                            | **Type**                    | **Example** |
+|-----------------------|--------------------------------------------------------------------------------------------|-----------------------------|-------------|
+| `repoUrl`             | Repository URL containing the project                                                      | `string`                    |             |
+| `projectId`           | Project Id                                                                                 | `number`                    |             |
+| `tokenDescription`    | Pipeline token description                                                                 | `string`                    |             |
+| `token`               | Token used for authenticating with GitLab API                                               | `string`                    |             |
+| `branch`              | Project branch on which the pipeline is triggered                                           | `string`                    |             |
+| `variables`           | A record of key-value pairs containing the pipeline variables (optional)                    | `record<string, string>`    |             |
+
 #### Examples
+```yaml
+steps:
+  - id: 'triggerPipeline'
+    name: 'Trigger Project Pipeline'
+    action: 'gitlab:pipeline:trigger'
+    input:
+      projectId: 12
+      tokenDescription: 'This is the text that will appear in the pipeline token'
+      token: 'glpt-xxxxxxxxxxxx'
+      branch: 'main'
+      variables:
+        var_one: 'one'
+        var_two: 'two'
+      # Include commonGitlabConfigExample if needed
+      # Add any other common properties here
+```
 
 #### Outputs
+| **Key**        | **Description**      | **Type**        |
+|----------------|----------------------|-----------------|
+| `pipelineUrl`  | Pipeline URL         | `string`        |
 
 #### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gitlab/src/actions/gitlabPipelineTrigger.ts
 
 ### `gitlab:projectAccessToken:create`
+Action that creates a project access token in GitLab.
+
 #### Inputs
+| Key          | Description                                            | Type                       | Example |
+|--------------|--------------------------------------------------------|----------------------------|---------|
+| `projectId`  | Project ID/Name(slug) of the GitLab Project           | `number` or `string`      |         |
+| `token`      | The token to use for authorization to GitLab          | `string`                   |         |
+| `name`       | Name of Access Key                                     | `string`                   |         |
+| `repoUrl`    | URL to GitLab instance                                 | `string`                   |         |
+| `accessLevel`| Access Level of the Token, 10 (Guest), 20 (Reporter), 30 (Developer), 40 (Maintainer), and 50 (Owner) | `number` |         |
+| `scopes`     | Scopes for a project access token                      | `string[]`                |         |
+| `expiresAt`  | Expiration date of the access token in ISO format (YYYY-MM-DD). If Empty, it will set to the maximum of 365 days. | `string` |         |
 
 #### Examples
+```yaml
+ - id: gitlab-access-token
+      name: Gitlab Project Access Token
+      action: gitlab:projectAccessToken:create
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        projectId: "${{ steps['publish-manifest'].output.projectId }}"
+        name: ${{ parameters.name }}-access-token
+        accessLevel: 40
+        scopes: ['read_repository', 'write_repository']
+```
 
 #### Outputs
+
+| Key          | Description               | Type   |
+|--------------|---------------------------|--------|
+| `access_token` | Access Token              | `string` |
 
 #### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gitlab/src/actions/gitlabProjectAccessTokenCreate.ts
 
 ### `gitlab:projectVariable:create`
+Action for creating project variables in GitLab.
+
 #### Inputs
 
+| Key                        | Description                                                                                        | Type                       | Example |
+|---------------------------|----------------------------------------------------------------------------------------------------|----------------------------|---------|
+| `repoUrl`                 | The URL of the GitLab repository                                                                    | `string`                   |         |
+| `projectId`               | Project ID                                                                                         | `number | string`         |         |
+| `key`                     | The key of a variable; must have no more than 255 characters; only A-Z, a-z, 0-9, and _ are allowed | `string`                   |         |
+| `value`                   | The value of a variable                                                                             | `string`                   |         |
+| `variableType`            | Variable Type (env_var or file)                                                                    | `string`                   |         |
+| `variableProtected`       | Whether the variable is protected                                                                    | `boolean`                  |         |
+| `masked`                  | Whether the variable is masked                                                                       | `boolean`                  |         |
+| `raw`                     | Whether the variable is expandable                                                                   | `boolean`                  |         |
+| `environmentScope`        | The environment_scope of the variable                                                                | `string`                   |         |
+| `token`                   | The token for authentication                                                                        | `string`                   |         |
+
 #### Examples
+```yaml
+- id: gitlab-project-variable
+      name: Gitlab Project Variable
+      action: gitlab:projectVariable:create
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        projectId: "${{ steps['publish'].output.projectId }}"
+        key: 'VARIABLE_NAME'
+        value: "${{ steps['gitlab-access-token'].output.access_token }}"
+        variableType: 'env_var'
+        masked: true
+        variableProtected: false
+        raw: false
+        environmentScope: '*'
+```
 
 #### Outputs
+None
 
 #### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gitlab/src/actions/gitlabProjectVariableCreate.ts
 
 ### `gitlab:projectDeployToken:create`
+Action that creates a GitLab project deploy token.
+
 #### Inputs
 
+| Key         | Description                   | Type                       | Example |
+|-------------|-------------------------------|----------------------------|---------|
+| projectId  | Project ID                    | `number` or `string`      |         |
+| name       | Deploy Token Name             | `string`                   |         |
+| username   | Deploy Token Username          | `string` (optional)        |         |
+| scopes     | Scopes                        | `array of string` (optional)|         |
+
 #### Examples
+```yaml
+   - id: gitlab-deploy-token
+      name: Create Deploy Token
+      action: gitlab:projectDeployToken:create
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        projectId: "${{ steps['publish'].output.projectId }}"
+        name: ${{ parameters.name }}-secret
+        username: ${{ parameters.name }}-secret
+        scopes: ['read_registry']
+```
 
 #### Outputs
+
+| Key          | Description                     | Type                      |
+|--------------|---------------------------------|---------------------------|
+| deploy_token | Deploy Token                    | `string`                  |
+| user         | User                            | `string`                  |
+
+
 
 #### Links
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gitlab/src/actions/gitlabProjectDeployTokenCreate.ts
@@ -4721,23 +5045,57 @@ https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-mo
 ## Humanitec
 
 ### `humanitec:create-app`
+Action for creating applications in Humanitec, using a YAML setup file to define application properties.
+
 #### Inputs
 
+| Key        | Description                     | Type                           | Example |
+|------------|---------------------------------|--------------------------------|--------|
+| appId      | The unique identifier for the application | `string`                       |        |
+| setupFile  | The path to the YAML file containing app setup information | `string`                       |        |
+
 #### Examples
+```yaml
+
+| Key        | Description                     | Type                           | Example |
+|------------|---------------------------------|--------------------------------|--------|
+| appId      | The unique identifier for the application | `string`                       |        |
+| setupFile  | The path to the YAML file containing app setup information | `string`                       |        |
+
+```
 
 #### Outputs
+None
 
 #### Links
 https://www.npmjs.com/package/@humanitec/backstage-plugin-scaffolder-backend-module
+https://github.com/humanitec/humanitec-backstage-plugins/blob/main/plugins/humanitec-backend-scaffolder-module/src/actions/create-app.ts
 
 ## Microsoft Teams
 
 ### `ms-teams:sendMessage`
+Action that sends messages to a Microsoft Teams channel using a specified webhook URL.
+
 #### Inputs
 
+| Key           | Description                                                                                  | Type   | Example |
+|---------------|----------------------------------------------------------------------------------------------|--------|---------|
+| `message`     | The message to send via webhook                                                              | string |         |
+| `webhookUrl`  | The Microsoft Teams webhook URL to send the request to. The URL must either be specified here or in the Backstage config | string |         |
+
 #### Examples
+```yaml
+ steps:
+    - id: send-ms-teams-message
+      name: Send message
+      action: ms-teams:sendMessage
+      input:
+        message: "Hello, world!"
+        webhookUrl: "https://your-url.com" # optional if the URL is supplied in the app-config.yaml
+```
 
 #### Outputs
+None
 
 #### Links
 https://www.npmjs.com/package/@grvpandey11/backstage-plugin-scaffolder-backend-module-ms-teams
