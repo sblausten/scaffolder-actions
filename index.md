@@ -5103,41 +5103,107 @@ https://www.npmjs.com/package/@grvpandey11/backstage-plugin-scaffolder-backend-m
 ## NPM
 
 ### `npm:init`
+Action that automates running the `npm init -y` command in a specified workspace directory.
+
 #### Inputs
 
+| **Key**               | **Description**                                                | **Type**         | **Example** |
+|-----------------------|----------------------------------------------------------------|------------------|-------------|
+| `ctx.workspacePath`    | The path of the workspace directory where `npm init` will be run | `string`         |             |
+| `ctx.logStream`        | The stream used to log the execution of the shell command       | `Stream`         |             |
+| `ctx.logger.info`      | Method for logging informational messages                      | `function`       |             |
+| `ctx.logger.error`     | Method for logging error messages                              | `function`       |             |
+
 #### Examples
+```yaml
+steps:
+    - id: npm-init
+      name: init
+      action: npm:init
+```
 
 #### Outputs
+
+| **Key**          | **Description**                        | **Type**   |
+|------------------|----------------------------------------|------------|
+| `npm:init`       | Action ID for identifying this template action | `string`   |
+| `npm`            | Command for running `npm init` retrieved via `getNpmCommand` | `string`   |
+| `executeShellCommand` | Function executing the npm command in the shell | `function` |
+
 
 #### Links
 https://github.com/arhill05/backstage-plugin-scaffolder-npm-actions
 
 ### `npm:install`
+Action for a Backstage Scaffolder plugin that installs an npm package quietly based on the provided package name.
+
 #### Inputs
 
+| **Key**               | **Description**               | **Type**     | **Example** |
+|-----------------------|-------------------------------|--------------|-------------|
+| `packageToInstall`     | Name of the package to install | `string`     |             |
+
 #### Examples
+```yaml
+   - id: npm-install
+      name: install
+      action: npm:install
+      input:
+        packageToInstall: ${{ parameters.packageToInstall }}
+```
 
 #### Outputs
+None
 
 #### Links
-https://github.com/arhill05/backstage-plugin-scaffolder-npm-actions
+https://github.com/arhill05/backstage-plugin-scaffolder-npm-actions/blob/master/src/actions/install/install.ts
 
 ### `npm:exec`
-#### Inputs
+Action for executing `npm exec` commands in a task workspace directory, using specific arguments provided in the input.
+
+### Inputs Table:
+
+| Key         | Description                                      | Type        | Example |
+|-------------|--------------------------------------------------|-------------|---------|
+| `arguments` | The arguments to pass to the npm exec command     | `array`     |         |
+| `arguments.items` | The individual string arguments in the array | `string`    |         |
+
 
 #### Examples
+```yaml
+ - id: npm-exec
+      name: exec
+      action: npm:exec
+      input:
+        args: ${{ parameters.execArgs }}
+```
 
 #### Outputs
+None
 
 #### Links
 https://github.com/arhill05/backstage-plugin-scaffolder-npm-actions
 
 ### `npm:config`
+For the Backstage scaffolder plugin that runs an `npm config` command with specified arguments in a task's workspace directory.
+
 #### Inputs
 
+| **Key**       | **Description**                                      | **Type**           | **Example** |
+|---------------|------------------------------------------------------|--------------------|-------------|
+| `arguments`   | The arguments to pass to the npm config command       | `array of strings` |             |
+
 #### Examples
+```yaml
+ - id: npm-config
+      name: config
+      action: npm:config
+      input:
+        args: ${{ parameters.execArgs }}
+```
 
 #### Outputs
+None
 
 #### Links
 https://github.com/arhill05/backstage-plugin-scaffolder-npm-actions
