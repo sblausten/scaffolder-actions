@@ -5211,33 +5211,94 @@ https://github.com/arhill05/backstage-plugin-scaffolder-npm-actions
 ## Odo
 
 ### `devfile:odo:command`
+Action for executing OpenShift Do (odo) commands in a workspace.
+
 #### Inputs
 
+| **Key**            | **Description**                                             | **Type**    | **Example** |
+|--------------------|-------------------------------------------------------------|-------------|-------------|
+| `command`          | The odo command to run from the scaffolder workspace         | `string`    |             |
+| `args`             | Arguments to pass to the command                            | `array`     |             |
+
+
 #### Examples
+```yaml
+  steps:
+    - id: generic-odo-command
+      name: Execute odo command
+      action: devfile:odo:command
+      input:
+        command: ${{ parameters.command }} # e.g.: 'analyze'
+        args: ${{ parameters.args }} # e.g.: ['-o', 'json']
+```
 
 #### Outputs
+| **Key**              | **Description**                                   | **Type**    |
+|----------------------|---------------------------------------------------|-------------|
+| `GLOBALODOCONFIG`     | Path to the temporary odo config file             | `string`    |
+| `ODO_TRACKING_CONSENT`| Telemetry tracking consent setting for odo        | `string`    |
+| `TELEMETRY_CALLER`    | Caller context for telemetry (set to `backstage`) | `string`    |
 
 #### Links
 https://www.npmjs.com/package/@backstage-community/plugin-scaffolder-backend-module-odo
+https://github.com/backstage/community-plugins/blob/main/workspaces/odo/plugins/scaffolder-backend-module-odo/src/actions/odo.ts
 
 ### `devfile:odo:component:init`
+Action to initialize an ODO (OpenShift Do) component using a Devfile within a Backstage scaffolder template.
+
+### Inputs
+
 #### Inputs
+| **Key**            | **Description**                     | **Type**      | **Example** |
+|--------------------|-------------------------------------|---------------|-------------|
+| `devfile`          | The Devfile to use                  | `string`      |             |
+| `version`          | The Devfile Stack version           | `string`      |             |
+| `starter_project`  | The starter project                 | `string`      |             |
+| `name`             | The new component name              | `string`      |             |
+
 
 #### Examples
+```yaml
+steps:
+    - id: odo-init
+      name: Generate
+      action: devfile:odo:component:init
+      input:
+        name: ${{ parameters.name }}
+        devfile: ${{ parameters.devfile_data.devfile }}
+        version: ${{ parameters.devfile_data.version }}
+        starter_project: ${{ parameters.devfile_data.starter_project }}
+```
 
 #### Outputs
+None
 
 #### Links
 https://www.npmjs.com/package/@backstage-community/plugin-scaffolder-backend-module-odo
+https://github.com/backstage/community-plugins/blob/main/workspaces/odo/plugins/scaffolder-backend-module-odo/src/actions/odo-init.ts
 
 ## Pagerduty
 
 ### `pagerduty:service:create`
+Action for the Backstage scaffolder plugin that allows users to create a PagerDuty service.
+
 #### Inputs
+
+| **Key**               | **Description**                                | **Type**      | **Example** |
+|-----------------------|------------------------------------------------|---------------|-------------|
+| `name`                | Name of the service                            | `string`      |             |
+| `description`         | Description of the service                     | `string`      |             |
+| `escalationPolicyId`   | Escalation policy ID for the service           | `string`      |             |
+| `alertGrouping`        | Alert grouping parameters (optional)           | `string`      |             |
 
 #### Examples
 
 #### Outputs
+| **Key**               | **Description**                                | **Type**     |
+|-----------------------|------------------------------------------------|--------------|
+| `serviceUrl`          | PagerDuty Service URL                          | `string`     |
+| `serviceId`           | PagerDuty Service ID                           | `string`     |
+| `integrationKey`      | Backstage Integration Key                      | `string`     |
 
 #### Links
 https://github.com/PagerDuty/backstage-plugin-scaffolder-actions/blob/main/src/actions/custom.ts
@@ -5246,80 +5307,228 @@ https://www.npmjs.com/package/@pagerduty/backstage-plugin-scaffolder-actions
 ## Quay
 
 ### quay:create-repository
-#### Inputs
+Action for creating a repository in Quay.io. 
+#### Input
+
+| Parameter Name |  Type  | Required | Description                                                                       | Example                                  |
+| -------------- | :----: | :------: | --------------------------------------------------------------------------------- | ---------------------------------------- |
+| name           | string |   Yes    | Quay repository name                                                              | foo                                      |
+| visibility     | string |   Yes    | Visibility setting for the created repository, either public or private           | public                                   |
+| description    | string |   Yes    | Description for the created repository                                            | This if foo repository                   |
+| token          | string |   Yes    | Authentication token, see [docs](https://docs.quay.io/api/)                       | UW1dLVdCTj8uZWNuIW97K1k0XiBkSmppVU9MYzFT |
+| baseUrl        | string |    No    | Base url of a quay instance, defaults to <https://quay.io>                        | <https://foo.quay.io>                    |
+| namespace      | string |    No    | Namespace to create repository in, defaults to the namespace the token belongs to | bar                                      |
+| repoKind       | string |    No    | Created repository kind, either image or application, if empty defaults to image  | image                                    |
+
 
 #### Examples
+```yaml
+action: quay:create-repository
+id: create-quay-repo
+name: Create quay repo
+input:
+  baseUrl: https://quay.io
+  token: UW1dLVdCTj8uZWNuIW97K1k0XiBkSmppVU9MYzFT
+  name: foo
+  visibility: public
+  description: This is a foo repository
+  namespace: bar
+  repoKind: image
+```
 
-#### Outputs
+#### Output
 
+| Name          |  Type  | Description                                |
+| ------------- | :----: | ------------------------------------------ |
+| repositoryUrl | string | Quay repository URL created by this action |
 #### Links
 https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-quay
+https://github.com/janus-idp/backstage-plugins/tree/main/plugins/quay-actions
 
 ## Sonarqube
 
 ### `sonarqube:create-project`
+Action for creating a project in SonarQube via the Backstage Scaffolder plugin.
 #### Inputs
 
+| **Key**      | **Description**                                                                                   | **Type**     | **Example**                  |
+|--------------|---------------------------------------------------------------------------------------------------|--------------|------------------------------|
+| `baseUrl`    | SonarQube server base URL. Example: `"https://sonar-server.com"`                                    | `string`     |                              |
+| `name`       | Name of the project to be created in SonarQube. Example: `"My Project"`                            | `string`     |                              |
+| `key`        | Key of the project to identify the project in SonarQube. Example: `"my-project"`                   | `string`     |                              |
+| `branch`     | Name of the main branch of the project. If not provided, the default main branch will be used      | `string`     |                              |
+| `visibility` | Whether the project should be visible to everyone or specific groups. Values: `"public"`, `"private"` | `string`     |                              |
+| `token`      | SonarQube authentication token. Use instead of username and password                               | `string`     |                              |
+| `username`   | SonarQube username. Required if no token is provided                                                | `string`     |                              |
+| `password`   | SonarQube password. Required if no token is provided                                                | `string`     |                              |
+
 #### Examples
+```yaml
+  steps:
+    - id: create-sonar-project
+      name: Create SonarQube project
+      action: sonarqube:create-project
+      input:
+        baseUrl: ${{ parameters.baseUrl }}
+        token: ${{ parameters.authParams.token }}
+        username: ${{ parameters.authParams.username }}
+        password: ${{ parameters.authParams.password }}
+        name: ${{ parameters.name }}
+        key: ${{ parameters.key }}
+        branch: ${{ parameters.branch }}
+        visibility: ${{ parameters.visibility }}
+```
 
 #### Outputs
+| **Key**        | **Description**                     | **Type**     |
+|----------------|-------------------------------------|--------------|
+| `projectUrl`   | SonarQube project URL created by this action | `string`     |
 
 #### Links
 https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-sonarqube
+https://github.com/janus-idp/backstage-plugins/blob/main/plugins/sonarqube-actions/src/actions/createSonarQubeProject.ts
 
 ## ServiceNow
 
 ### `servicenow:now:table:createRecord`
-#### Inputs
+Action for Backstage's Scaffolder, allowing users to insert a record into a specified ServiceNow.
+#### Input
 
-#### Examples
+| Parameter Name                |              Type              | Required | Description                                                                                |
+| ----------------------------- | :----------------------------: | :------: | ------------------------------------------------------------------------------------------ |
+| `tableName`                   |            `string`            |   Yes    | Name of the table in which to save the record                                              |
+| `requestBody`                 | `Record<PropertyKey, unknown>` |    No    | Field name and the associated value for each parameter to define in the specified record   |
+| `sysparmDisplayValue`         | `enum("true", "false", "all")` |    No    | Return field display values (true), actual values (false), or both (all) (default: false)  |
+| `sysparmExcludeReferenceLink` |           `boolean`            |    No    | True to exclude Table API links for reference fields (default: false)                      |
+| `sysparmFields`               |           `string[]`           |    No    | An array of fields to return in the response                                               |
+| `sysparmInputDisplayValue`    |           `boolean`            |    No    | Set field values using their display value (true) or actual value (false) (default: false) |
+| `sysparmSuppressAutoSysField` |           `boolean`            |    No    | True to suppress auto generation of system fields (default: false)                         |
+| `sysparmView`                 |            `string`            |    No    | Render the response according to the specified UI view (overridden by sysparm_fields)      |
 
-#### Outputs
+#### Output
 
+| Name     |              Type              | Description                      |
+| -------- | :----------------------------: | -------------------------------- |
+| `result` | `Record<PropertyKey, unknown>` | The response body of the request |
 #### Links
 https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-servicenow
+
 ### `servicenow:now:table:deleteRecord`
+Action for deleting a record from a ServiceNow table. 
 #### Inputs
+| Parameter Name         |   Type    | Required | Description                                                       |
+| ---------------------- | :-------: | :------: | ----------------------------------------------------------------- |
+| `tableName`            | `string`  |   Yes    | Name of the table in which to delete the record                   |
+| `sysId`                | `string`  |   Yes    | Unique identifier of the record to delete                         |
+| `sysparmQueryNoDomain` | `boolean` |    No    | True to access data across domains if authorized (default: false) |
 
 #### Examples
 
 #### Outputs
+None
 
 #### Links
 https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-servicenow
 ### `servicenow:now:table:modifyRecord`
-#### Inputs
+Action handler that modifies a record in a ServiceNow table.
+#### Input
 
-#### Examples
+| Parameter Name                |              Type              | Required | Description                                                                                |
+| ----------------------------- | :----------------------------: | :------: | ------------------------------------------------------------------------------------------ |
+| `tableName`                   |            `string`            |   Yes    | Name of the table in which to modify the record                                            |
+| `sysId`                       |            `string`            |   Yes    | Unique identifier of the record to modify                                                  |
+| `requestBody`                 | `Record<PropertyKey, unknown>` |    No    | Field name and the associated value for each parameter to define in the specified record   |
+| `sysparmDisplayValue`         | `enum("true", "false", "all")` |    No    | Return field display values (true), actual values (false), or both (all) (default: false)  |
+| `sysparmExcludeReferenceLink` |           `boolean`            |    No    | True to exclude Table API links for reference fields (default: false)                      |
+| `sysparmFields`               |           `string[]`           |    No    | An array of fields to return in the response                                               |
+| `sysparmInputDisplayValue`    |           `boolean`            |    No    | Set field values using their display value (true) or actual value (false) (default: false) |
+| `sysparmSuppressAutoSysField` |           `boolean`            |    No    | True to suppress auto generation of system fields (default: false)                         |
+| `sysparmView`                 |            `string`            |    No    | Render the response according to the specified UI view (overridden by sysparm_fields)      |
+| `sysparmQueryNoDomain`        |           `boolean`            |    No    | True to access data across domains if authorized (default: false)                          |
 
-#### Outputs
+#### Output
+
+| Name     |              Type              | Description                      |
+| -------- | :----------------------------: | -------------------------------- |
+| `result` | `Record<PropertyKey, unknown>` | The response body of the request |
 
 #### Links
 https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-servicenow
 ### `servicenow:now:table:retrieveRecord`
-#### Inputs
+Action handler that retrieves a record in a ServiceNow table.
+#### Input
 
-#### Examples
+| Parameter Name                |              Type              | Required | Description                                                                               |
+| ----------------------------- | :----------------------------: | :------: | ----------------------------------------------------------------------------------------- |
+| `tableName`                   |            `string`            |   Yes    | Name of the table from which to retrieve the record                                       |
+| `sysId`                       |            `string`            |   Yes    | Unique identifier of the record to retrieve                                               |
+| `sysparmDisplayValue`         | `enum("true", "false", "all")` |    No    | Return field display values (true), actual values (false), or both (all) (default: false) |
+| `sysparmExcludeReferenceLink` |           `boolean`            |    No    | True to exclude Table API links for reference fields (default: false)                     |
+| `sysparmFields`               |           `string[]`           |    No    | An array of fields to return in the response                                              |
+| `sysparmView`                 |            `string`            |    No    | Render the response according to the specified UI view (overridden by sysparm_fields)     |
+| `sysparmQueryNoDomain`        |           `boolean`            |    No    | True to access data across domains if authorized (default: false)                         |
 
-#### Outputs
+#### Output
+
+| Name     |              Type              | Description                      |
+| -------- | :----------------------------: | -------------------------------- |
+| `result` | `Record<PropertyKey, unknown>` | The response body of the request |
+
 
 #### Links
 https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-servicenow
 ### `servicenow:now:table:retrieveRecords`
+Action handler that retrieves records in a ServiceNow table.
+
 #### Inputs
+
+| Parameter Name                    |              Type              | Required | Description                                                                               |
+| --------------------------------- | :----------------------------: | :------: | ----------------------------------------------------------------------------------------- |
+| `tableName`                       |            `string`            |   Yes    | Name of the table from which to retrieve the records                                      |
+| `sysparmQuery`                    |            `string`            |    No    | An encoded query string used to filter the results                                        |
+| `sysparmDisplayValue`             | `enum("true", "false", "all")` |    No    | Return field display values (true), actual values (false), or both (all) (default: false) |
+| `sysparmExcludeReferenceLink`     |           `boolean`            |    No    | True to exclude Table API links for reference fields (default: false)                     |
+| `sysparmSuppressPaginationHeader` |           `boolean`            |    No    | True to suppress pagination header (default: false)                                       |
+| `sysparmFields`                   |           `string[]`           |    No    | An array of fields to return in the response                                              |
+| `sysparmLimit`                    |             `int`              |    No    | The maximum number of results returned per page (default: 10,000)                         |
+| `sysparmView`                     |            `string`            |    No    | Render the response according to the specified UI view (overridden by sysparm_fields)     |
+| `sysparmQueryCategory`            |            `string`            |    No    | Name of the query category (read replica category) to use for queries                     |
+| `sysparmQueryNoDomain`            |           `boolean`            |    No    | True to access data across domains if authorized (default: false)                         |
+| `sysparmNoCount`                  |           `boolean`            |    No    | Do not execute a select count(\*) on table (default: false)                               |
 
 #### Examples
 
 #### Outputs
+| Name     |              Type              | Description                      |
+| -------- | :----------------------------: | -------------------------------- |
+| `result` | `Record<PropertyKey, unknown>` | The response body of the request |
 
 #### Links
 https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-servicenow
+
 ### `servicenow:now:table:updateRecord`
+Action handler that updates a record in a ServiceNow table.
+
 #### Inputs
+| Parameter Name                |              Type              | Required | Description                                                                                |
+| ----------------------------- | :----------------------------: | :------: | ------------------------------------------------------------------------------------------ |
+| `tableName`                   |            `string`            |   Yes    | Name of the table in which to update the record                                            |
+| `sysId`                       |            `string`            |   Yes    | Unique identifier of the record to update                                                  |
+| `requestBody`                 | `Record<PropertyKey, unknown>` |    No    | Field name and the associated value for each parameter to define in the specified record   |
+| `sysparmDisplayValue`         | `enum("true", "false", "all")` |    No    | Return field display values (true), actual values (false), or both (all) (default: false)  |
+| `sysparmExcludeReferenceLink` |           `boolean`            |    No    | True to exclude Table API links for reference fields (default: false)                      |
+| `sysparmFields`               |           `string[]`           |    No    | An array of fields to return in the response                                               |
+| `sysparmInputDisplayValue`    |           `boolean`            |    No    | Set field values using their display value (true) or actual value (false) (default: false) |
+| `sysparmSuppressAutoSysField` |           `boolean`            |    No    | True to suppress auto generation of system fields (default: false)                         |
+| `sysparmView`                 |            `string`            |    No    | Render the response according to the specified UI view (overridden by sysparm_fields)      |
+| `sysparmQueryNoDomain`        |           `boolean`            |    No    | True to access data across domains if authorized (default: false)                          |
 
 #### Examples
 
 #### Outputs
+| Name     |              Type              | Description                      |
+| -------- | :----------------------------: | -------------------------------- |
+| `result` | `Record<PropertyKey, unknown>` | The response body of the request |
 
 #### Links
 https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-servicenow
@@ -5327,21 +5536,60 @@ https://www.npmjs.com/package/@janus-idp/backstage-scaffolder-backend-module-ser
 ## Slack
 
 ### `slack:sendMessage:conversation`
+Action for sending Slack messages to a specific conversation using the Slack API.
+
 #### Inputs
+| **Key**               | **Description**                                                                                   | **Type**    | **Example** |
+|-----------------------|---------------------------------------------------------------------------------------------------|-------------|-------------|
+| `message`             | The message to send via webhook.                                                                  | `string`    |             |
+| `conversationId`       | The ID of the conversation to send the message to. If both conversation ID and name are specified, the ID will be used. | `string`    |             |
+| `conversationName`     | The name of the conversation to send the message to. Used only if the conversation ID is not specified. | `string`    |             |
+| `token`               | The token to authenticate with the Slack API. This can be specified in the app config or the input. | `string`    |             |
 
 #### Examples
+```yaml
+- id: send-slack-message
+      name: Send slack message via Slack API
+      action: slack:sendMessage:conversation
+      input:
+        message: "Hello, world!"
+        conversationId: "abc123" # optional if the conversationId is supplied in the app-config.yaml, or the conversationName is supplied at all
+        conversationName: "general" # optional if the conversationName is supplied in the app-config.yaml, or the conversationId is supplied at all
+```
 
 #### Outputs
+
+| **Key**       | **Description**                                                                     | **Type**       |
+|---------------|-------------------------------------------------------------------------------------|----------------|
+| `conversationIdToUse` | The ID of the conversation that the message is being sent to.                  | `string`       |
+| `result`      | The result object containing the response from Slack's `postMessage` API.             | `ChatPostMessageResponse` |
 
 #### Links
 https://github.com/arhill05/backstage-plugin-scaffolder-backend-module-slack/blob/main/src/actions/slack/send-slack-message-via-slack-api.ts
 
 ### `slack:sendMessage:webhook`
+Action that sends a message to Slack via a webhook URL. 
+
 #### Inputs
+| **Key**        | **Description**                                                                    | **Type**   | **Example** |
+|----------------|------------------------------------------------------------------------------------|------------|-------------|
+| `message`      | The message to send via the webhook                                                | `string`   |             |
+| `webhookUrl`   | The webhook URL to send the request to. Can be passed as input or from the config.  | `string`   |             |
 
 #### Examples
+```yaml
+ steps:
+    # this step is an example of using the webhook action
+    - id: send-slack-message
+      name: Send slack message via Slack webhook
+      action: slack:sendMessage:webhook
+      input:
+        message: "Hello, world!"
+        webhookUrl: "https://example.com" # optional if the URL is supplied in the app-config.yaml
+```
 
 #### Outputs
+None
 
 #### Links
 https://www.npmjs.com/package/@mdude2314/backstage-plugin-scaffolder-backend-module-slack
@@ -5349,48 +5597,163 @@ https://www.npmjs.com/package/@mdude2314/backstage-plugin-scaffolder-backend-mod
 ## Sentry
 
 ### `sentry:create-project`
+Action to create a new project in Sentry.
+
 #### Inputs
+
+| Key                  | Description                                                                           | Type   | Example |
+|----------------------|---------------------------------------------------------------------------------------|--------|---------|
+| `organizationSlug`   | The slug of the organization the team belongs to                                      | string |         |
+| `teamSlug`           | The slug of the team to create a new project for                                     | string |         |
+| `name`               | The name for the new project                                                          | string |         |
+| `slug`               | Optional slug for the new project. If not provided, a slug is generated from the name | string |         |
+| `authToken`          | Authenticate via bearer auth token. Requires scope: project:write                    | string |         |
+
 
 #### Examples
 
+```yaml
+steps:
+  - id: create-sentry-project
+    action: sentry:project:create
+    name: Create a Sentry project with provided project slug.
+    input:
+      organizationSlug: my-org
+      teamSlug: team-a
+      name: Scaffolded project A
+      slug: scaff-proj-a
+      authToken: a14711beb516e1e910d2ede554dc1bf725654ef3c75e5a9106de9aec13d5df96
+```
+
+This YAML configuration outlines a step for creating a Sentry project. 
 #### Outputs
+
+| Key  | Description                               | Type   |
+|------|-------------------------------------------|--------|
+| `id` | The ID of the created project in Sentry  | string |
+| `result` | The result object returned from Sentry  | object |
 
 #### Links
 https://github.com/backstage/backstage/tree/master/plugins/scaffolder-backend-module-sentry
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-sentry/src/actions/createProject.ts
 
 ## Torque
-
 ### `torque:create-app`
+Action for managing applications in Torque.
+
+
 #### Inputs
+| Key                | Description                                                 | Type               | Example |
+|--------------------|-------------------------------------------------------------|--------------------|---------|
+| `serviceName`      | The name of the service that will be created in Torque      | `string`           |         |
+| `assetRepo`        | The asset repo that will be connected to Torque             | `string`           |         |
+| `blueprintRepo`    | The blueprints repo that will be connected to Torque        | `string`           |         |
+| `namespace`        | The namespace of the environment runner                     | `string`           |         |
+| `blueprintName`    | The name of a blueprint that will be a source for sandbox environment | `string`           |         |
+| `serviceAccount`    | A service account to be used for connecting to the execution host | `string`           |         |
+| `repoType`         | The type of repository (e.g., GitHub or Bitbucket)         | `string`           |         |
 
 #### Examples
+```yaml
+  - name: Deploy with Torque
+      id: torque-app-id
+      action: torque:create-app
+      input:
+        serviceName: ${{ parameters.componentName }} # The name of service that will be created in Torque. 
+        # Will be used as space, assets repo, blueprint repo and grain names
+        assetRepo: ${{ steps.publish.output.remoteUrl }} # The asset repo that will be connected to Torque
+        blueprintRepo: ${{ steps.publish.output.remoteUrl }} # The blueprints repo that will be connected to Torque
+        serviceAccount: 'default' # A k8s service account to assign to agent
+        namespace: default # A k8s namespace to assign to agent
+        blueprintName: ${{ parameters.componentName }} # The name of a blueprint you that will be a source for sandbox environment
+```
 
 #### Outputs
 
+| Key               | Description                                                  | Type               |
+|-------------------|--------------------------------------------------------------|--------------------|
+| `success`         | Indicates whether the operation was successful               | `boolean`          |
+| `error`           | Contains error details if the operation failed               | `string | null`    |
+| `environmentId`   | The ID of the created sandbox environment                    | `string`           |
+| `spaceName`       | The name of the created space                                 | `string`           | 
+
 #### Links
 https://www.npmjs.com/package/@qtorque/backstage-plugin-torque-backend
+https://github.com/QualiTorque/torque-backstage-plugin/blob/main/packages/torque-backend/src/actions/create-app.ts
 
 ## Webex
 
 ### `webex:webhooks:sendMessage`
+Action that sends messages to Webex Incoming Webhooks.
+
 #### Inputs
+| Key       | Description                                     | Type                               | Example |
+|-----------|-------------------------------------------------|------------------------------------|---------|
+| format    | The message content format                       | `enum` ('text', 'markdown')       |         |
+| message   | The message to send via webhook(s)              | `string`                           |         |
+| webhooks  | The Webex Incoming Webhooks to send a message to| `string[]` (non-empty array)      |         |
 
 #### Examples
+Once the action is registered, you can use it in your scaffolder templates to send messages via Webex Incoming Webhooks.
 
+Here's an example template:
+```yaml
+spec:
+  . . .
+  steps:
+    - id: send-webex-message
+      name: Send Webex Message
+      action: webex:webhooks:sendMessage
+      input:
+        format: "markdown"
+        message: "# This Could Be Us"
+        webhooks:
+          - "https://webexapis.com/v1/webhooks/incoming/<SPACE_ID>"
+          - "https://webexapis.com/v1/webhooks/incoming/<SPACE_ID>" # optional ability to message multiple spaces
+```
 #### Outputs
+| Key            | Description                             | Type              |
+|----------------|-----------------------------------------|-------------------|
+| failedMessages  | List of messages that failed to send   | `string[]`        |
 
 #### Links
 https://www.npmjs.com/package/@coderrob/backstage-plugin-scaffolder-backend-module-webex
+https://github.com/Coderrob/backstage-plugin-scaffolder-backend-module-webex/blob/main/src/actions/sendWebhooksMessageAction.ts
 
 ## Yeoman
 
 ### `run:yeoman`
+Action for the Backstage scaffolder that runs a Yeoman generator.
+
 #### Inputs
+| Key       | Description                                            | Type        | Example |
+|-----------|--------------------------------------------------------|-------------|--------|
+| `namespace` | Yeoman generator namespace, e.g: node:app           | `string`    |        |
+| `args`    | Arguments to pass on to Yeoman for templating         | `array`     |        |
+| `options` | Options to pass on to Yeoman for templating           | `object`    |        |
 
 #### Examples
+### YAML Representation
+
+```yaml
+steps:
+  - id: 'run:yeoman'
+    action: 'run:yeoman'
+    name: 'Running a yeoman generator'
+    input:
+      namespace: 'node:app'
+      options:
+        option1: 'value1'
+        option2: 'value2'
+```
+
+### Description
+
+This YAML snippet defines a step in a process that involves running a Yeoman generator.
+The input to this action includes the `namespace` set to `'node:app'`, indicating which Yeoman generator to use. 
 
 #### Outputs
+None
 
 #### Links
 https://github.com/backstage/backstage/tree/master/plugins/scaffolder-backend-module-yeoman
