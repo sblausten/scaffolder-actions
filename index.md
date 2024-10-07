@@ -3472,7 +3472,7 @@ steps:
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-bitbucket-cloud/src/actions/bitbucketCloudPullRequest.ts
 
 ### `publish:bitbucketServer`
-Action for Backstage that initializes a Git repository and publishes it to Bitbucket Server, handling repository creation, commits, and optional Git Large File Storage (LFS) enablement.
+Creates a new repository in Bitbucket Server. 
 
 
 #### Inputs
