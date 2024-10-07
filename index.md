@@ -3555,7 +3555,6 @@ steps:
       description: This is a detailed description of my pull request
 ```
 
-### Description:
 This YAML representation defines a single step in a workflow that creates a pull request on a Bitbucket Server, including action type, identification, name, and input parameters like repository URL, title, source branch, and description.
 
 #### Outputs
