@@ -3611,7 +3611,7 @@ Verify resource dependencies for CNOE.
 https://github.com/cnoe-io/plugin-scaffolder-actions/blob/HEAD/src/actions/verify.ts
 
 ### `cnoe:utils:sanitize`
-Action for sanitizing a YAML document by removing empty objects.
+Action for sanitizing resources defined in a YAML document by removing empty fields, before further processing.
 
 #### Inputs
 
