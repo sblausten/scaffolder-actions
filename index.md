@@ -3687,7 +3687,7 @@ Action that transforms Confluence content into Markdown format and updates a Git
 https://github.com/backstage/backstage/tree/master/plugins/scaffolder-backend-module-confluence-to-markdown
 
 ## Cue
-Action for the Backstage scaffolder that fetches template content, runs a Cue command, and copies output files to a specified directory.
+This action fetches some template content, runs a Cue command on it, and copies output files to a specified directory.
 
 ### `cue:cueflow`
 #### Inputs
