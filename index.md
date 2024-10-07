@@ -3711,7 +3711,6 @@ This action fetches some template content, runs a Cue command on it, and copies 
 https://github.com/shoukoo/backstage-plugin-scaffolder-cuelang/blob/main/src/actions/cueflow.ts
 
 ## Gerrit
-Action for creating a new Gerrit review by committing and pushing changes to a Git repository.
 
 ### `publish:gerrit:review`
 #### Inputs
