@@ -3751,7 +3751,7 @@ This publishes a new Gerrit review, specifying the repository URL, commit messag
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gerrit/src/actions/gerritReview.ts
 
 ### `publish:gerrit`
-Action that initializes a Git repository with content from the workspace and publishes it to a Gerrit instance.
+Action that initializes a Git repository with content from the workspace and publishes it to a Gerrit repository.
 
 #### Inputs
 | Key                 | Description                                                                      | Type        | Example |
