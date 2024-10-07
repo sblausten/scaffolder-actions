@@ -3653,7 +3653,7 @@ steps:
       repository: ${{ parameters.repoName }}
 ```
 
-This invokes the action `codacy:add-repo` to add a specified repository from a given code hosting provider (GitHub, GitLab, or Bitbucket) to Codacy, using the organization or username as the owner and a parameter for the repository name.
+This example adds a specified repository from a given code hosting provider (GitHub, GitLab, or Bitbucket) to Codacy, using the organization or username as the owner and a parameter for the repository name.
 
 #### Outputs
 
