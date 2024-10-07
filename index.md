@@ -3511,7 +3511,6 @@ steps:
       gitAuthorEmail: 'test.user@example.com'
 ```
 
-### Description
 This publishes a repository to Bitbucket Server, specifying repository details, visibility, commit information, and optional configuration like enabling LFS.
 
 #### Outputs
