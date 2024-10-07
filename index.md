@@ -3713,6 +3713,8 @@ https://github.com/shoukoo/backstage-plugin-scaffolder-cuelang/blob/main/src/act
 ## Gerrit
 
 ### `publish:gerrit:review`
+
+Action for creating a new Gerrit review by committing and pushing changes to a Git repository.
 #### Inputs
 
 | Key                   | Description                                                             | Type                  | Example |
