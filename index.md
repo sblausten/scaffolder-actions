@@ -3525,7 +3525,7 @@ This publishes a repository to Bitbucket Server, specifying repository details, 
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-bitbucket-server/src/actions/bitbucketServer.ts
 
 ### `publish:bitbucketServer:pull-request`
-Creates a custom action to publish a pull request to a Bitbucket Server repository.
+Opens a pull request on a Bitbucket Server repository to merge two existing branches.
 
 #### Inputs
 
