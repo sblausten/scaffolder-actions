@@ -3788,7 +3788,7 @@ This publishes content to a Gerrit repository.
 https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend-module-gerrit/src/actions/gerrit.ts
 
 ## Gitea
-Action for Backstage that initializes a git repository from workspace content and publishes it to a Gitea instance.
+This action initializes a git repository from workspace content and publishes it to a Gitea repository.
 
 ### `publish:gitea`
 #### Inputs
