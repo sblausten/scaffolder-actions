@@ -3738,7 +3738,6 @@ steps:
       branch: develop
 ```
 
-### Description
 This publishes a new Gerrit review, specifying the repository URL, commit message, and branch to use.
 
 #### Outputs
