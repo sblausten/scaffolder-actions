@@ -3592,7 +3592,7 @@ Action for applying Kubernetes manifests using `kubectl`, either from a string, 
 https://github.com/cnoe-io/plugin-scaffolder-actions/blob/HEAD/src/actions/k8s-apply.ts
 
 ### `cnoe:verify:dependency`
-Action for verifying dependencies using a specified command-line tool, where it checks for the existence of the command and executes it with provided verifiers.
+Verify resource dependencies for CNOE.
 
 #### Inputs
 | Key         | Description                       | Type                  | Example |
