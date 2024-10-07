@@ -3816,6 +3816,7 @@ steps:
       repoVisibility: 'private'
 ```
 This publishes a repository to Gitea.
+
 #### Outputs
 | Key                     | Description                                                                                               | Type     |
 |------------------------|-----------------------------------------------------------------------------------------------------------|----------|
